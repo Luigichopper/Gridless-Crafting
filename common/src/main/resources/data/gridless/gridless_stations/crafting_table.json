@@ -1,0 +1,9 @@
+{
+  "id": "minecraft:crafting_table",
+  "block_tag": "c:workbench",
+  "allowed_recipe_types": [
+    "minecraft:crafting"
+  ],
+  "supports_quick_craft": true,
+  "override_vanilla_gui": true
+}

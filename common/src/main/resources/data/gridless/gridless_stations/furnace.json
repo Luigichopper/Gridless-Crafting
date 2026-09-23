@@ -1,0 +1,10 @@
+{
+  "id": "minecraft:furnace",
+  "block_tag": "c:furnace",
+  "allowed_recipe_types": [
+    "minecraft:smelting"
+  ],
+  "supports_quick_craft": true,
+  "override_vanilla_gui": true,
+  "mode": "SMELTING"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "minecraft:blast_furnace",
+  "block_tag": "c:blast_furnace",
+  "allowed_recipe_types": [
+    "minecraft:blasting"
+  ],
+  "supports_quick_craft": true,
+  "override_vanilla_gui": true,
+  "mode": "SMELTING"
+}

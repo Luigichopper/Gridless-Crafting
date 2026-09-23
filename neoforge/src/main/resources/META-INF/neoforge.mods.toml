@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+
+[[mods]]
+modId="gridless"
+version="${version}"
+displayName="Gridless Crafting"
+description="Terraria-style gridless crafting and station overhaul for Minecraft."
+authors="Luigi"
+
+[[dependencies.gridless]]
+    modId="neoforge"
+    type="required"
+    mandatory=true
+    versionRange="[21.1,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.gridless]]
+    modId="minecraft"
+    type="required"
+    mandatory=true
+    versionRange="[1.21.1,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[mixins]]
+    config="gridless-common.mixins.json"

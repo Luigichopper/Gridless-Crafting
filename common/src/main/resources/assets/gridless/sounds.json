@@ -1,0 +1,29 @@
+{
+  "craft_click": {
+    "subtitle": "subtitles.gridless.craft_click",
+    "sounds": [
+      {
+        "name": "minecraft:ui.button.click",
+        "type": "event"
+      }
+    ]
+  },
+  "recipe_select": {
+    "subtitle": "subtitles.gridless.recipe_select",
+    "sounds": [
+      {
+        "name": "minecraft:ui.button.click",
+        "type": "event"
+      }
+    ]
+  },
+  "craft_fail": {
+    "subtitle": "subtitles.gridless.craft_fail",
+    "sounds": [
+      {
+        "name": "minecraft:block.note_block.bass",
+        "type": "event"
+      }
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "gridless:inventory",
+  "allowed_recipe_types": [
+    "minecraft:crafting"
+  ],
+  "supports_quick_craft": true,
+  "override_vanilla_gui": false
+}

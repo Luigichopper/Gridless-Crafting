@@ -1,0 +1,10 @@
+{
+  "id": "minecraft:smoker",
+  "block_tag": "c:smoker",
+  "allowed_recipe_types": [
+    "minecraft:smoking"
+  ],
+  "supports_quick_craft": true,
+  "override_vanilla_gui": true,
+  "mode": "SMELTING"
+}

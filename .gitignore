@@ -1,0 +1,32 @@
+# Gradle & Build Directories
+.gradle/
+build/
+**/build/
+bin/
+out/
+
+# Minecraft Run / Testing Directories
+run/
+**/run/
+*.log
+
+# IDE & Editor Files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+*.factorypath
+
+# OS Specific Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
