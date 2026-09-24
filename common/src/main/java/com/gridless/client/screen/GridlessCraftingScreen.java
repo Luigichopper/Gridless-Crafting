@@ -441,7 +441,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
         graphics.fill(invBoxX, invBoxY, invBoxX + invBoxWidth, invBoxY + invBoxHeight, 0xCC1E1E1E);
         graphics.outline(invBoxX, invBoxY, invBoxWidth, invBoxHeight, 0xFF3A3A3A);
 
-        graphics.text(this.font, Component.translatable("gui.gridless.inventory").getString(), invBoxX + 8, invBoxY + 4, 0x888888, false);
+        graphics.text(this.font, Component.translatable("gui.gridless.inventory").getString(), invBoxX + 8, invBoxY + 4, 0xFF888888, false);
 
         // Slot background boxes (18x18 each) - Main inventory 3 rows x 9 cols
         for (int row = 0; row < 3; row++) {
@@ -499,7 +499,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
             int tabY = fuelSlotY - 9;
             graphics.fill(fuelSlotX, tabY, fuelSlotX + 18, fuelSlotY, 0xFFFF6F00); // Amber orange
             graphics.outline(fuelSlotX, tabY, 18, 10, 0xFFFFB300);
-            graphics.text(this.font, "🔥", fuelSlotX + 5, tabY + 1, 0xFFFFFF, false);
+            graphics.text(this.font, "🔥", fuelSlotX + 5, tabY + 1, 0xFFFFFFFF, false);
 
             // Orange highlight around designated fuel slot (slot 0)
             graphics.outline(fuelSlotX, fuelSlotY, 18, 18, 0xFFFF8C00);

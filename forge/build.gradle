@@ -28,7 +28,7 @@ configurations.all {
 
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
-    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
+    annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}")
 
     common(project(path: ":common")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }

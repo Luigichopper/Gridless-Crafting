@@ -67,7 +67,7 @@ public class CategoryTabWidget extends AbstractWidget {
             String label = getCategoryLabel(cat);
             int textX = tabX + (currentTabWidth - font.width(label)) / 2;
             int textY = tabY + (tabHeight - 8) / 2;
-            int textColor = isSelected ? 0xFFFFFF : (isHovered ? 0xDDDDDD : 0x888888);
+            int textColor = isSelected ? 0xFFFFFFFF : (isHovered ? 0xFFDDDDDD : 0xFF888888);
             graphics.text(font, label, textX, textY, textColor, false);
         }
     }

@@ -111,7 +111,7 @@ public class RecipeRibbonWidget extends AbstractWidget {
             if (font.width(itemName) > maxTextWidth) {
                 itemName = font.plainSubstrByWidth(itemName, maxTextWidth - 6) + "..";
             }
-            int textColor = isCraftable ? (isSelected ? 0xFFFFFF : 0xE0E0E0) : 0x777777;
+            int textColor = isCraftable ? (isSelected ? 0xFFFFFFFF : 0xFFE0E0E0) : 0xFF777777;
             graphics.text(font, itemName, itemX + 24, itemY + 6, textColor, false);
 
             if (recipe.getVariantCount() > 1) {

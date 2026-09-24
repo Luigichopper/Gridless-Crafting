@@ -103,7 +103,7 @@ public class IngredientCardWidget extends AbstractWidget {
         if (recipe == null) {
             Font font = Minecraft.getInstance().font;
             String text = Component.translatable("gui.gridless.select_recipe").getString();
-            graphics.text(font, text, this.getX() + (this.width - font.width(text)) / 2, this.getY() + this.height / 2 - 4, 0x777777, false);
+            graphics.text(font, text, this.getX() + (this.width - font.width(text)) / 2, this.getY() + this.height / 2 - 4, 0xFF777777, false);
             return;
         }
 
@@ -126,7 +126,7 @@ public class IngredientCardWidget extends AbstractWidget {
         if (font.width(title) > maxTitleWidth) {
             title = font.plainSubstrByWidth(title, maxTitleWidth - 6) + "..";
         }
-        graphics.text(font, title, this.getX() + 27, headerY + 7, 0xFFFFFF, false);
+        graphics.text(font, title, this.getX() + 27, headerY + 7, 0xFFFFFFFF, false);
 
         // Variant selector (< 1/3 >) if recipe has multiple variants
         if (variantCount > 1) {
@@ -140,19 +140,19 @@ public class IngredientCardWidget extends AbstractWidget {
 
             graphics.fill(btnLeftX, btnArrowY, btnLeftX + 11, btnArrowY + 14, hoverLeft ? 0xFF444444 : 0xFF333333);
             graphics.outline(btnLeftX, btnArrowY, 11, 14, hoverLeft ? 0xFFFFA726 : 0xFF555555);
-            graphics.text(font, "<", btnLeftX + 3, btnArrowY + 3, hoverLeft ? 0xFFFFA726 : 0xAAAAAA, false);
+            graphics.text(font, "<", btnLeftX + 3, btnArrowY + 3, hoverLeft ? 0xFFFFA726 : 0xFFAAAAAA, false);
 
             String varStr = currentVariant + "/" + variantCount;
             graphics.text(font, varStr, btnLeftX + 13 + (24 - font.width(varStr)) / 2, btnArrowY + 3, 0xFFFFA726, false);
 
             graphics.fill(btnRightX, btnArrowY, btnRightX + 11, btnArrowY + 14, hoverRight ? 0xFF444444 : 0xFF333333);
             graphics.outline(btnRightX, btnArrowY, 11, 14, hoverRight ? 0xFFFFA726 : 0xFF555555);
-            graphics.text(font, ">", btnRightX + 3, btnArrowY + 3, hoverRight ? 0xFFFFA726 : 0xAAAAAA, false);
+            graphics.text(font, ">", btnRightX + 3, btnArrowY + 3, hoverRight ? 0xFFFFA726 : 0xFFAAAAAA, false);
         }
 
         // 2. Ingredients Section Header
         int listHeaderY = this.getY() + 27;
-        graphics.text(font, Component.translatable("gui.gridless.required_materials").getString(), this.getX() + 6, listHeaderY, 0xAAAAAA, false);
+        graphics.text(font, Component.translatable("gui.gridless.required_materials").getString(), this.getX() + 6, listHeaderY, 0xFFAAAAAA, false);
 
         // 3. Scrollable Ingredients Viewport
         int viewportY = getViewportY();
@@ -197,17 +197,17 @@ public class IngredientCardWidget extends AbstractWidget {
                 ingName = font.plainSubstrByWidth(ingName, maxNameWidth - 6) + "..";
             }
 
-            graphics.text(font, ingName, this.getX() + 24, rowY + 3, hasEnough ? 0xDDDDDD : 0xAAAAAA, false);
+            graphics.text(font, ingName, this.getX() + 24, rowY + 3, hasEnough ? 0xFFDDDDDD : 0xFFAAAAAA, false);
 
             String countStr;
             int countColor;
             if (hasEnough) {
                 countStr = have + "/" + need;
-                countColor = 0x55FF55; // Green
+                countColor = 0xFF55FF55; // Green
             } else {
                 int missing = missingMap.getOrDefault(input, need - have);
                 countStr = have + "/" + need + " (-" + missing + ")";
-                countColor = 0xFF5555; // Red
+                countColor = 0xFFFF5555; // Red
             }
 
             int countWidth = font.width(countStr);
@@ -270,7 +270,7 @@ public class IngredientCardWidget extends AbstractWidget {
         graphics.fill(btn1X, btnY, btn1X + btnWidth, btnY + btnHeight, btn1Color);
         graphics.outline(btn1X, btnY, btnWidth, btnHeight, canCraft ? 0xFF81C784 : 0xFF444444);
         String btn1Text = Component.translatable("gui.gridless.craft_x1").getString();
-        graphics.text(font, btn1Text, btn1X + (btnWidth - font.width(btn1Text)) / 2, btnY + 5, canCraft ? 0xFFFFFF : 0x777777, false);
+        graphics.text(font, btn1Text, btn1X + (btnWidth - font.width(btn1Text)) / 2, btnY + 5, canCraft ? 0xFFFFFFFF : 0xFF777777, false);
 
         // Button 2: Craft Max
         int btn2X = btn1X + btnWidth + 6;
@@ -279,7 +279,7 @@ public class IngredientCardWidget extends AbstractWidget {
         graphics.fill(btn2X, btnY, btn2X + btnWidth, btnY + btnHeight, btn2Color);
         graphics.outline(btn2X, btnY, btnWidth, btnHeight, canCraft && maxCraft > 0 ? 0xFF64B5F6 : 0xFF444444);
         String btn2Text = Component.translatable("gui.gridless.craft_max", maxCraft).getString();
-        graphics.text(font, btn2Text, btn2X + (btnWidth - font.width(btn2Text)) / 2, btnY + 5, canCraft && maxCraft > 0 ? 0xFFFFFF : 0x777777, false);
+        graphics.text(font, btn2Text, btn2X + (btnWidth - font.width(btn2Text)) / 2, btnY + 5, canCraft && maxCraft > 0 ? 0xFFFFFFFF : 0xFF777777, false);
     }
 
     public void renderIngredientTooltips(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
