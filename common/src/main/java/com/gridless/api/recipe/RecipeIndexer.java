@@ -21,6 +21,8 @@ public class RecipeIndexer {
         Collection<RecipeHolder<?>> holders;
         if (recipeAccess instanceof RecipeMap map) {
             holders = map.values();
+        } else if (recipeAccess instanceof net.minecraft.world.item.crafting.RecipeManager manager) {
+            holders = ((com.gridless.mixin.RecipeManagerAccessor) manager).getRecipes().values();
         } else {
             holders = Collections.emptyList();
         }
