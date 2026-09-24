@@ -47,7 +47,7 @@ shadowJar {
 tasks.matching { it.name == "remapJar" }.configureEach {
     inputFile.set shadowJar.archiveFile
     dependsOn shadowJar
-    archiveClassifier.set null
+    archiveClassifier.set "forge"
 }
 
 jar {
