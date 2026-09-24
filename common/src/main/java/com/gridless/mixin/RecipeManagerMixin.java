@@ -27,10 +27,4 @@ public class RecipeManagerMixin {
         RecipeManager self = (RecipeManager) (Object) this;
         RecipeIndexer.reindex(self, this.registries);
     }
-
-    @Inject(method = "replaceRecipes", at = @At("TAIL"))
-    private void onReplaceRecipes(Iterable<RecipeHolder<?>> recipes, CallbackInfo ci) {
-        RecipeManager self = (RecipeManager) (Object) this;
-        RecipeIndexer.reindex(self, this.registries != null ? this.registries : HolderLookup.Provider.create(java.util.stream.Stream.empty()));
-    }
 }
