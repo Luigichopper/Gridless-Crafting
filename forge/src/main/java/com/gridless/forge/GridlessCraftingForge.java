@@ -2,7 +2,6 @@ package com.gridless.forge;
 
 import com.gridless.GridlessMod;
 import com.gridless.api.station.StationRegistry;
-import com.gridless.client.gui.GridlessConfigScreen;
 import com.gridless.forge.network.ForgeNetworkHandler;
 import com.gridless.sound.GridlessSounds;
 import net.minecraft.core.registries.Registries;
@@ -22,10 +21,12 @@ public class GridlessCraftingForge {
 
         RegisterEvent.getBus(context.getModBusGroup()).addListener(this::registerSounds);
         AddReloadListenerEvent.BUS.addListener(this::addReloadListeners);
+        net.minecraftforge.event.server.ServerStartingEvent.BUS.addListener(event -> ensureLootModifierManagerInitialized(null));
+
+        ensureLootModifierManagerInitialized(null);
 
         if (FMLLoader.getDist().isClient()) {
-            context.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
-                    () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new GridlessConfigScreen(parent)));
+            com.gridless.forge.client.GridlessCraftingClientForge.registerConfigScreen(context);
         }
     }
 
@@ -34,6 +35,21 @@ public class GridlessCraftingForge {
     }
 
     private void addReloadListeners(AddReloadListenerEvent event) {
+        ensureLootModifierManagerInitialized(event.getRegistries());
         event.addListener(StationRegistry.INSTANCE);
+    }
+
+    private static void ensureLootModifierManagerInitialized(net.minecraft.core.HolderLookup.Provider registries) {
+        try {
+            java.lang.reflect.Field field = Class.forName("net.minecraftforge.common.ForgeInternalHandler").getDeclaredField("INSTANCE");
+            field.setAccessible(true);
+            if (field.get(null) == null) {
+                net.minecraft.core.HolderLookup.Provider provider = registries != null ? registries : net.minecraft.data.registries.VanillaRegistries.createLookup();
+                field.set(null, new net.minecraftforge.common.loot.LootModifierManager(provider));
+                GridlessMod.LOGGER.info("Initialized fallback LootModifierManager to prevent crash before resource reload.");
+            }
+        } catch (Throwable t) {
+            GridlessMod.LOGGER.debug("Could not ensure LootModifierManager initialization: {}", t.getMessage());
+        }
     }
 }

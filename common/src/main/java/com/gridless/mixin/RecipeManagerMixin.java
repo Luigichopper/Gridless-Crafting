@@ -20,8 +20,9 @@ public class RecipeManagerMixin {
     @Final
     private HolderLookup.Provider registries;
 
-    @Inject(method = "apply(Lnet/minecraft/world/item/crafting/RecipeMap;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At("TAIL"))
-    private void onApply(RecipeMap map, ResourceManager resourceManager, ProfilerFiller profiler, CallbackInfo ci) {
-        RecipeIndexer.reindex(map, this.registries);
+    @Inject(method = "finalizeRecipeLoading", at = @At("TAIL"))
+    private void onFinalizeRecipeLoading(net.minecraft.world.flag.FeatureFlagSet flags, CallbackInfo ci) {
+        RecipeManager self = (RecipeManager) (Object) this;
+        RecipeIndexer.reindex(self, this.registries);
     }
 }
