@@ -29,19 +29,15 @@ public class InventoryScreenMixin {
 
     private static final ResourceLocation CLEAN_INVENTORY_LOCATION = ResourceLocation.fromNamespaceAndPath("gridless", "textures/gui/container/inventory.png");
 
-    @ModifyArg(
-            method = "renderBg",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V"
-            ),
-            index = 0
-    )
-    private ResourceLocation modifyInventoryTexture(ResourceLocation original) {
+    @Inject(method = "renderBg", at = @At("HEAD"), cancellable = true)
+    private void onRenderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY, CallbackInfo ci) {
         if (GridlessConfig.general.enabled && GridlessConfig.general.remove_crafting_inventory) {
-            return CLEAN_INVENTORY_LOCATION;
+            ci.cancel();
+            AbstractContainerScreenAccessor accessor = (AbstractContainerScreenAccessor) (Object) this;
+            int x = accessor.getLeftPos();
+            int y = accessor.getTopPos();
+            graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, CLEAN_INVENTORY_LOCATION, x, y, 0.0F, 0.0F, 176, 166, 256, 256);
         }
-        return original;
     }
 
     @Inject(method = "init", at = @At("TAIL"))
