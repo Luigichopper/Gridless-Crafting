@@ -1,9 +1,9 @@
 # Gridless Crafting
 
-![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen?style=flat-square)
+![Minecraft Version](https://img.shields.io/badge/Minecraft-26.1-brightgreen?style=flat-square)
 ![Mod Loaders](https://img.shields.io/badge/Loaders-Fabric%20%7C%20Forge%20%7C%20NeoForge-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
-![Java Version](https://img.shields.io/badge/Java-21-orange?style=flat-square)
+![Java Version](https://img.shields.io/badge/Java-25-orange?style=flat-square)
 
 Gridless Crafting replaces Minecraft's traditional $3 \times 3$ grid crafting screens with a dynamic, scrollable list system inspired by Terraria. View all craftable items at a glance, search recipes instantly, and craft without manual ingredient grid placement.
 
@@ -24,11 +24,13 @@ Gridless Crafting replaces Minecraft's traditional $3 \times 3$ grid crafting sc
 
 ### Developer API
 
-Third-party mod developers can compile against the API JAR:
+Gridless Crafting provides a clean, platform-agnostic API for registering custom crafting stations, querying flattened recipes, and utilizing instant smelting calculations.
+
+For complete integration guides, JSON schemas, and Java examples, see **[API.md](API.md)**.
 
 ```groovy
 dependencies {
-    compileOnly files("libs/gridless-crafting-1.0.0+1.21.1-api.jar")
+    compileOnly("com.gridless:gridless-crafting:${gridless_version}:api")
 }
 ```
 
