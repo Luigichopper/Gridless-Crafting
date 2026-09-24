@@ -1,54 +1,30 @@
-# Gridless Crafting (Terraria-Style) Mod & API
+# Gridless Crafting
 
-A multi-loader Minecraft mod (**Fabric**, **Forge**, & **NeoForge**) for Minecraft 1.21.1 that completely reimagines Minecraft's traditional $3 \times 3$ and $2 \times 2$ grid crafting into a dynamic, scrollable Terraria-style list and picker system.
+![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen?style=flat-square)
+![Mod Loaders](https://img.shields.io/badge/Loaders-Fabric%20%7C%20Forge%20%7C%20NeoForge-blue?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+![Java Version](https://img.shields.io/badge/Java-21-orange?style=flat-square)
 
----
-
-## Features
-
-- **Terraria-Style Recipe Ribbon**: A vertical scrollable carousel displaying all craftable item icons, with full mouse dragging and scroll wheel support.
-- **Dynamic Inventory Refresh**: Instantly updates the craftable list as items enter or leave your inventory.
-- **Ingredient Breakdown & Highlighting**:
-  - Displays required materials with clear `have / need` counters and missing material alerts.
-  - Automatically highlights inventory slots containing inputs for the currently selected recipe (Emerald Green outline).
-- **Search & Category Filtering**: Live text search across item names and resource identifiers, paired with intuitive category tabs:
-  - `All`, `Weapons`, `Tools`, `Armor`, `Building`, `Redstone`, `Consumables`, `Miscellaneous`.
-- **Flexible Crafting Actions**:
-  - **Left-Click**: Craft 1 item.
-  - **Shift-Click / Craft Max**: Craft the maximum possible stack.
-  - **Right-Click / Hold**: Continuous rapid crafting.
-- **Smelting & Timed Conversion**:
-  - **Mode A (Traditional)**: Preserves vanilla furnace screens.
-  - **Mode B (Instant with Fuel)**: Gridless smelting with exact fuel calculation $\lceil \frac{\text{Item Count} \times \text{Cook Time}}{\text{Fuel Burn Time}} \rceil$ and automatic fuel deduction.
-- **Native 3-Tab Config Screen**: Native GUI configuration split across **General**, **Stations**, and **Audio & Visual** tabs (supported natively across Fabric, Forge, and NeoForge mod menus).
-- **Data-Driven Station Model**: Stations are dynamically defined via JSON in data packs (`data/<namespace>/gridless_stations/*.json`). Any block or tag can serve as a station.
-- **Robust Anti-Cheat Networking**: Client screens send crafting intent (`C2SCraftGridlessRecipePayload`); the server independently verifies player distance, station block validity, atomically verifies input items, deducts materials, and awards outputs.
+Gridless Crafting replaces Minecraft's traditional $3 \times 3$ grid crafting screens with a dynamic, scrollable list system inspired by Terraria. View all craftable items at a glance, search recipes instantly, and craft without manual ingredient grid placement.
 
 ---
 
-## Multi-Loader Architecture
+### Features
 
-```text
-Gridless/
-├── common/             # Platform-agnostic API, recipe models, networking payloads, UI ribbon logic, data loader
-├── fabric/             # Fabric entry points, networking registration, Fabric PlatformHelper & ModMenu integration
-├── forge/              # Forge entry points, registry listeners, Forge PlatformHelper & Config screen factory
-└── neoforge/           # NeoForge entry points, registry listeners, NeoForge PlatformHelper & Config screen factory
-```
-
-- **Target Version**: Minecraft 1.21.1
-- **Java**: Java 21 LTS
-- **Build System**: Architectury Loom with multi-project Gradle
+- **Scrollable Recipe Ribbon**: Vertical carousel displaying all available recipes with full mouse drag and scroll wheel support.
+- **Dynamic Inventory Refresh**: Recipe availability updates automatically as items enter or leave your inventory.
+- **Ingredient Highlighting**: Outlines inventory slots containing required materials for the selected recipe.
+- **Search & Category Filters**: Search by item name or ID, with filtering tabs for Weapons, Tools, Armor, Building, Redstone, Consumables, and Miscellaneous.
+- **Flexible Crafting Actions**: Left-click to craft 1, Shift-click to craft max, or hold right-click for continuous rapid crafting.
+- **Gridless Smelting**: Optional mode for instant smelting using exact fuel consumption calculations.
+- **Config Screen**: Native 3-tab configuration GUI for General, Stations, and Audio & Visual settings.
+- **Data-Driven Stations**: Custom stations can be registered via data packs (`data/<namespace>/gridless_stations/*.json`) or Java API.
 
 ---
 
-## Developer API & API JAR
+### Developer API
 
-Gridless Crafting provides an API for other mod developers to register custom stations, define recipe handlers, or integrate custom crafting mechanics.
-
-### Compiling Against the API
-
-You can compile against the lightweight API JAR (`gridless-crafting-1.0.0+1.21.1-api.jar`) which exposes `com.gridless.api.**`:
+Third-party mod developers can compile against the API JAR:
 
 ```groovy
 dependencies {
@@ -56,60 +32,13 @@ dependencies {
 }
 ```
 
-### Adding Custom Stations via JSON
-
-Create a JSON file in your mod's data pack at `data/<your_mod>/gridless_stations/<station_name>.json`:
-
-```json
-{
-  "id": "mymod:infusion_altar",
-  "block_tag": "mymod:altars",
-  "allowed_recipe_types": [
-    "mymod:infusion",
-    "minecraft:crafting"
-  ],
-  "supports_quick_craft": true,
-  "override_vanilla_gui": true,
-  "mode": "NORMAL"
-}
-```
-
-### Registering Stations in Code
-
-```java
-import com.gridless.api.station.StationRegistry;
-import com.gridless.api.station.GridlessStation;
-import com.gridless.api.station.StationMode;
-
-StationRegistry.register(new GridlessStation(
-    ResourceLocation.fromNamespaceAndPath("mymod", "altar"),
-    ResourceLocation.fromNamespaceAndPath("mymod", "altars"),
-    List.of(ResourceLocation.fromNamespaceAndPath("mymod", "infusion")),
-    true,
-    true,
-    StationMode.NORMAL
-));
-```
-
 ---
 
-## Building
-
-To build all mod JARs and the API JAR locally:
+### Building
 
 ```bash
-# Build all production mod JARs and the API JAR
 ./gradlew build
 ```
 
-Generated outputs:
-- **Fabric**: `fabric/build/libs/gridless-crafting-1.0.0+1.21.1.jar`
-- **Forge**: `forge/build/libs/gridless-crafting-1.0.0+1.21.1.jar`
-- **NeoForge**: `neoforge/build/libs/gridless-crafting-1.0.0+1.21.1.jar`
-- **API JAR**: `common/build/libs/gridless-crafting-1.0.0+1.21.1-api.jar`
+Compiled JARs will be generated in `fabric/build/libs`, `forge/build/libs`, `neoforge/build/libs`, and `common/build/libs`.
 
----
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
