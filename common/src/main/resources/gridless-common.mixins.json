@@ -2,10 +2,14 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.gridless.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "mixins": [
     "RecipeManagerMixin",
-    "InventoryMenuMixin"
+    "RecipeManagerAccessor",
+    "InventoryMenuMixin",
+    "SingleItemRecipeAccessor",
+    "ShapedRecipeAccessor",
+    "ShapelessRecipeAccessor"
   ],
   "client": [
     "CraftingScreenMixin",
@@ -13,6 +17,7 @@
     "AbstractFurnaceScreenMixin",
     "ScreenAccessor",
     "AbstractContainerScreenAccessor",
+    "AbstractRecipeBookScreenAccessor",
     "SlotAccessor",
     "ClientPacketListenerMixin"
   ],

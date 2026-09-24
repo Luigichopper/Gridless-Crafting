@@ -2,7 +2,7 @@ package com.gridless.api.station;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
@@ -13,16 +13,16 @@ import java.util.Collections;
 import java.util.List;
 
 public class GridlessStation {
-    private final ResourceLocation id;
-    private final ResourceLocation blockTagId;
-    private final List<ResourceLocation> allowedRecipeTypeIds;
+    private final Identifier id;
+    private final Identifier blockTagId;
+    private final List<Identifier> allowedRecipeTypeIds;
     private final boolean supportsQuickCraft;
     private final boolean overrideVanillaGui;
     private final StationMode mode;
 
-    public GridlessStation(ResourceLocation id,
-                           ResourceLocation blockTagId,
-                           List<ResourceLocation> allowedRecipeTypeIds,
+    public GridlessStation(Identifier id,
+                           Identifier blockTagId,
+                           List<Identifier> allowedRecipeTypeIds,
                            boolean supportsQuickCraft,
                            boolean overrideVanillaGui,
                            StationMode mode) {
@@ -34,15 +34,15 @@ public class GridlessStation {
         this.mode = mode != null ? mode : StationMode.NORMAL;
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 
-    public ResourceLocation getBlockTagId() {
+    public Identifier getBlockTagId() {
         return blockTagId;
     }
 
-    public List<ResourceLocation> getAllowedRecipeTypeIds() {
+    public List<Identifier> getAllowedRecipeTypeIds() {
         return allowedRecipeTypeIds;
     }
 
@@ -59,7 +59,7 @@ public class GridlessStation {
     }
 
     public boolean isAllowedRecipeType(RecipeType<?> type) {
-        ResourceLocation typeId = BuiltInRegistries.RECIPE_TYPE.getKey(type);
+        Identifier typeId = BuiltInRegistries.RECIPE_TYPE.getKey(type);
         if (typeId == null) return false;
         return allowedRecipeTypeIds.contains(typeId);
     }
@@ -71,7 +71,7 @@ public class GridlessStation {
             return true;
         }
         // Direct block ID fallback
-        ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+        Identifier blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         return blockId != null && blockId.equals(blockTagId);
     }
 }

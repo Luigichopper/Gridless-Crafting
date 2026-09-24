@@ -14,6 +14,9 @@ public class ClientPacketListenerMixin {
     @Inject(method = "handleUpdateTags", at = @At("TAIL"))
     private void onUpdateTags(ClientboundUpdateTagsPacket packet, CallbackInfo ci) {
         ClientPacketListener self = (ClientPacketListener) (Object) this;
-        RecipeIndexer.reindex(self.getRecipeManager(), self.registryAccess());
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.hasSingleplayerServer() && mc.getSingleplayerServer() != null) {
+            RecipeIndexer.reindex(mc.getSingleplayerServer().getRecipeManager(), self.registryAccess());
+        }
     }
 }

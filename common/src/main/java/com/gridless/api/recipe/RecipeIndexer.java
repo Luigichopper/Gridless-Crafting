@@ -1,25 +1,33 @@
 package com.gridless.api.recipe;
 
 import com.gridless.GridlessMod;
+import com.gridless.mixin.ShapedRecipeAccessor;
+import com.gridless.mixin.ShapelessRecipeAccessor;
+import com.gridless.mixin.SingleItemRecipeAccessor;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RecipeIndexer {
-    private static final Map<ResourceLocation, GridlessRecipe> INDEXED_RECIPES = new ConcurrentHashMap<>();
+    private static final Map<Identifier, GridlessRecipe> INDEXED_RECIPES = new ConcurrentHashMap<>();
     private static final Map<RecipeType<?>, List<GridlessRecipe>> BY_TYPE = new ConcurrentHashMap<>();
 
+    public static void reindex(RecipeMap recipeMap, HolderLookup.Provider registries) {
+        reindex(recipeMap.values(), registries);
+    }
+
     public static void reindex(RecipeManager recipeManager, HolderLookup.Provider registries) {
+        reindex(recipeManager.getRecipes(), registries);
+    }
+
+    public static void reindex(Iterable<RecipeHolder<?>> holders, HolderLookup.Provider registries) {
         INDEXED_RECIPES.clear();
         BY_TYPE.clear();
-
-        Collection<RecipeHolder<?>> holders = recipeManager.getRecipes();
-        GridlessMod.LOGGER.info("Indexing {} vanilla recipes for Gridless Crafting...", holders.size());
 
         for (RecipeHolder<?> holder : holders) {
             try {
@@ -50,7 +58,7 @@ public class RecipeIndexer {
         return null;
     }
 
-    public static GridlessRecipe get(ResourceLocation id) {
+    public static GridlessRecipe get(Identifier id) {
         return INDEXED_RECIPES.get(id);
     }
 
@@ -58,10 +66,10 @@ public class RecipeIndexer {
         return Collections.unmodifiableCollection(INDEXED_RECIPES.values());
     }
 
-    public static List<GridlessRecipe> getForTypes(List<ResourceLocation> allowedTypeIds) {
+    public static List<GridlessRecipe> getForTypes(List<Identifier> allowedTypeIds) {
         List<GridlessRecipe> result = new ArrayList<>();
         for (Map.Entry<RecipeType<?>, List<GridlessRecipe>> entry : BY_TYPE.entrySet()) {
-            ResourceLocation typeId = net.minecraft.core.registries.BuiltInRegistries.RECIPE_TYPE.getKey(entry.getKey());
+            Identifier typeId = net.minecraft.core.registries.BuiltInRegistries.RECIPE_TYPE.getKey(entry.getKey());
             if (typeId != null && allowedTypeIds.contains(typeId)) {
                 result.addAll(entry.getValue());
             }
@@ -98,43 +106,63 @@ public class RecipeIndexer {
 
     public static GridlessRecipe indexRecipe(RecipeHolder<?> holder, HolderLookup.Provider registries) {
         Recipe<?> recipe = holder.value();
-        ResourceLocation id = holder.id();
+        Identifier id = holder.id().identifier();
         RecipeType<?> type = recipe.getType();
 
-        ItemStack output;
-        try {
-            output = recipe.getResultItem(registries != null ? registries : HolderLookup.Provider.create(java.util.stream.Stream.empty()));
-        } catch (Exception e) {
+        ItemStack output = null;
+        boolean requires3x3 = false;
+        List<CountedIngredient> inputs = null;
+        int cookTime = 0;
+        float experience = 0f;
+
+        if (recipe instanceof ShapedRecipe shaped) {
+            output = ((ShapedRecipeAccessor) shaped).getResult().create();
+            requires3x3 = shaped.getWidth() > 2 || shaped.getHeight() > 2;
+            List<Ingredient> list = shaped.getIngredients().stream()
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toList();
+            inputs = consolidateIngredients(list);
+        } else if (recipe instanceof ShapelessRecipe shapeless) {
+            output = ((ShapelessRecipeAccessor) shapeless).getResult().create();
+            requires3x3 = false;
+            inputs = consolidateIngredients(((ShapelessRecipeAccessor) shapeless).getIngredients());
+        } else if (recipe instanceof AbstractCookingRecipe cooking) {
+            output = ((SingleItemRecipeAccessor) cooking).getResult().create();
+            requires3x3 = false;
+            inputs = List.of(new CountedIngredient(cooking.input(), 1));
+            cookTime = cooking.cookingTime();
+            experience = cooking.experience();
+        } else if (recipe instanceof SingleItemRecipe singleItem) {
+            output = ((SingleItemRecipeAccessor) singleItem).getResult().create();
+            requires3x3 = false;
+            inputs = List.of(new CountedIngredient(singleItem.input(), 1));
+        } else {
+            try {
+                List<RecipeDisplay> displays = recipe.display();
+                if (!displays.isEmpty()) {
+                    RecipeDisplay disp = displays.get(0);
+                    net.minecraft.util.context.ContextMap context = registries != null
+                            ? new net.minecraft.util.context.ContextMap.Builder().withParameter(net.minecraft.world.item.crafting.display.SlotDisplayContext.REGISTRIES, registries).create(net.minecraft.world.item.crafting.display.SlotDisplayContext.CONTEXT)
+                            : new net.minecraft.util.context.ContextMap.Builder().create(net.minecraft.world.item.crafting.display.SlotDisplayContext.CONTEXT);
+                    output = disp.result().resolveForFirstStack(context);
+                }
+            } catch (Exception ignored) {}
+        }
+
+        if (output == null || output.isEmpty() || inputs == null || inputs.isEmpty()) {
             return null;
         }
-        if (output == null || output.isEmpty()) return null;
 
-        // Use Minecraft's native dimension check: returns true if it can be crafted in 2x2
-        boolean fitsIn2x2 = recipe.canCraftInDimensions(2, 2);
-        boolean requires3x3 = !fitsIn2x2;
-
-        List<CountedIngredient> inputs;
-        if (recipe instanceof ShapedRecipe shaped) {
-            inputs = consolidateIngredients(shaped.getIngredients());
-        } else if (recipe instanceof ShapelessRecipe shapeless) {
-            inputs = consolidateIngredients(shapeless.getIngredients());
-        } else if (recipe instanceof AbstractCookingRecipe cooking) {
-            inputs = consolidateIngredients(cooking.getIngredients());
-            return new GridlessRecipe(id, output, inputs, type, RecipeCategory.classify(output), cooking.getCookingTime(), cooking.getExperience(), false);
-        } else {
-            inputs = consolidateIngredients(recipe.getIngredients());
-        }
-
-        if (inputs.isEmpty()) return null;
-
-        return new GridlessRecipe(id, output, inputs, type, RecipeCategory.classify(output), 0, 0f, requires3x3);
+        return new GridlessRecipe(id, output, inputs, type, RecipeCategory.classify(output), cookTime, experience, requires3x3);
     }
 
-    private static List<CountedIngredient> consolidateIngredients(NonNullList<Ingredient> list) {
+    public static List<CountedIngredient> consolidateIngredients(List<Ingredient> list) {
         List<CountedIngredient> result = new ArrayList<>();
+        if (list == null) return result;
 
         for (Ingredient ing : list) {
-            if (ing.isEmpty()) continue;
+            if (ing == null || ing.isEmpty()) continue;
 
             boolean merged = false;
             for (int i = 0; i < result.size(); i++) {

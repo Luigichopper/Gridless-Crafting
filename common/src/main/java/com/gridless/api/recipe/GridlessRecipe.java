@@ -1,6 +1,6 @@
 package com.gridless.api.recipe;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 
@@ -13,7 +13,7 @@ public class GridlessRecipe {
         LOCKED
     }
 
-    private final ResourceLocation id;
+    private final Identifier id;
     private final ItemStack result;
     private final List<CountedIngredient> inputs;
     private final RecipeType<?> recipeType;
@@ -25,7 +25,7 @@ public class GridlessRecipe {
     private final List<GridlessRecipe> variants = new ArrayList<>();
     private int activeVariantIndex = 0;
 
-    public GridlessRecipe(ResourceLocation id,
+    public GridlessRecipe(Identifier id,
                           ItemStack result,
                           List<CountedIngredient> inputs,
                           RecipeType<?> recipeType,
@@ -92,7 +92,7 @@ public class GridlessRecipe {
         }
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return getActiveVariant().id;
     }
 

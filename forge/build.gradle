@@ -17,15 +17,20 @@ configurations {
     common
     shadowCommon
     compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'net.sf.jopt-simple:jopt-simple:5.0.4'
+    }
 }
 
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixin_extras_version}"))
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    common(project(path: ":common")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
 }
 
@@ -40,13 +45,6 @@ processResources {
 shadowJar {
     exclude "architectury.common.json"
     configurations = [project.configurations.shadowCommon]
-    archiveClassifier.set "dev-shadow"
-    destinationDirectory.set(layout.buildDirectory.dir("devlibs"))
-}
-
-tasks.matching { it.name == "remapJar" }.configureEach {
-    inputFile.set shadowJar.archiveFile
-    dependsOn shadowJar
     archiveClassifier.set "forge"
 }
 

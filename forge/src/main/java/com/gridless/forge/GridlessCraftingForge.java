@@ -7,9 +7,7 @@ import com.gridless.forge.network.ForgeNetworkHandler;
 import com.gridless.sound.GridlessSounds;
 import net.minecraft.core.registries.Registries;
 import net.minecraftforge.client.ConfigScreenHandler;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -22,13 +20,11 @@ public class GridlessCraftingForge {
         GridlessMod.init();
         ForgeNetworkHandler.init();
 
-        IEventBus modEventBus = context.getModEventBus();
-        modEventBus.addListener(this::registerSounds);
-
-        MinecraftForge.EVENT_BUS.addListener(this::addReloadListeners);
+        RegisterEvent.getBus(context.getModBusGroup()).addListener(this::registerSounds);
+        AddReloadListenerEvent.BUS.addListener(this::addReloadListeners);
 
         if (FMLLoader.getDist().isClient()) {
-            ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
+            context.registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
                     () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> new GridlessConfigScreen(parent)));
         }
     }

@@ -4,14 +4,15 @@ import com.gridless.api.station.StationRegistry;
 import com.gridless.client.screen.GridlessCraftingScreen;
 import com.gridless.config.GridlessConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,17 +28,17 @@ import java.util.Optional;
 @Mixin(InventoryScreen.class)
 public class InventoryScreenMixin {
 
-    private static final ResourceLocation CLEAN_INVENTORY_LOCATION = ResourceLocation.fromNamespaceAndPath("gridless", "textures/gui/container/inventory.png");
+    private static final Identifier CLEAN_INVENTORY_LOCATION = Identifier.fromNamespaceAndPath("gridless", "textures/gui/container/inventory.png");
 
     @ModifyArg(
-            method = "renderBg",
+            method = "extractBackground",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/GuiGraphics;blit(Lnet/minecraft/resources/ResourceLocation;IIIIII)V"
+                    target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blit(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIFFIIII)V"
             ),
-            index = 0
+            index = 1
     )
-    private ResourceLocation modifyInventoryTexture(ResourceLocation original) {
+    private Identifier modifyInventoryTexture(Identifier original) {
         if (GridlessConfig.general.enabled && GridlessConfig.general.remove_crafting_inventory) {
             return CLEAN_INVENTORY_LOCATION;
         }
@@ -55,8 +56,9 @@ public class InventoryScreenMixin {
 
         // 1. Remove 2x2 crafting grid, recipe book, and adjust centering if configured
         if (GridlessConfig.general.remove_crafting_inventory) {
-            if (self.getRecipeBookComponent().isVisible()) {
-                self.getRecipeBookComponent().toggleVisibility();
+            RecipeBookComponent<?> book = ((AbstractRecipeBookScreenAccessor) self).getRecipeBookComponent();
+            if (book.isVisible()) {
+                book.toggleVisibility();
             }
             accessor.setLeftPos((self.width - accessor.getImageWidth()) / 2);
 
@@ -121,8 +123,8 @@ public class InventoryScreenMixin {
         }
     }
 
-    @Inject(method = "renderLabels", at = @At("HEAD"), cancellable = true)
-    private void onRenderLabels(GuiGraphics graphics, int mouseX, int mouseY, CallbackInfo ci) {
+    @Inject(method = "extractLabels", at = @At("HEAD"), cancellable = true)
+    private void onRenderLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY, CallbackInfo ci) {
         if (GridlessConfig.general.enabled && GridlessConfig.general.remove_crafting_inventory) {
             // Cancel drawing the vanilla "Crafting" label that was printed above the 2x2 grid
             ci.cancel();

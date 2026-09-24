@@ -5,16 +5,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Optional;
 
-public record C2SCraftGridlessRecipePayload(ResourceLocation recipeId,
+public record C2SCraftGridlessRecipePayload(Identifier recipeId,
                                             int amount,
                                             Optional<BlockPos> stationPos,
                                             boolean isInventoryCrafting) implements CustomPacketPayload {
 
-    public static final Type<C2SCraftGridlessRecipePayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(GridlessMod.MOD_ID, "craft_gridless_recipe"));
+    public static final Type<C2SCraftGridlessRecipePayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(GridlessMod.MOD_ID, "craft_gridless_recipe"));
 
     public static final StreamCodec<FriendlyByteBuf, C2SCraftGridlessRecipePayload> STREAM_CODEC = CustomPacketPayload.codec(
             C2SCraftGridlessRecipePayload::write,
@@ -23,7 +23,7 @@ public record C2SCraftGridlessRecipePayload(ResourceLocation recipeId,
 
     public C2SCraftGridlessRecipePayload(FriendlyByteBuf buf) {
         this(
-                buf.readResourceLocation(),
+                buf.readIdentifier(),
                 buf.readVarInt(),
                 buf.readOptional(b -> b.readBlockPos()),
                 buf.readBoolean()
@@ -31,7 +31,7 @@ public record C2SCraftGridlessRecipePayload(ResourceLocation recipeId,
     }
 
     public void write(FriendlyByteBuf buf) {
-        buf.writeResourceLocation(recipeId);
+        buf.writeIdentifier(recipeId);
         buf.writeVarInt(amount);
         buf.writeOptional(stationPos, (b, pos) -> b.writeBlockPos(pos));
         buf.writeBoolean(isInventoryCrafting);

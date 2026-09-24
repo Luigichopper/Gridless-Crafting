@@ -4,9 +4,10 @@ import com.gridless.api.recipe.RecipeCategory;
 import com.gridless.sound.GridlessSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 
@@ -38,7 +39,7 @@ public class CategoryTabWidget extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         Font font = Minecraft.getInstance().font;
         int tabWidth = this.width / COLS;
         int tabHeight = this.height / ROWS;
@@ -60,18 +61,18 @@ public class CategoryTabWidget extends AbstractWidget {
 
             // Tab background & border
             graphics.fill(tabX, tabY, tabX + currentTabWidth, tabY + tabHeight, bgColor);
-            graphics.renderOutline(tabX, tabY, currentTabWidth, tabHeight, borderColor);
+            graphics.outline(tabX, tabY, currentTabWidth, tabHeight, borderColor);
 
             // Tab label
             String label = getCategoryLabel(cat);
             int textX = tabX + (currentTabWidth - font.width(label)) / 2;
             int textY = tabY + (tabHeight - 8) / 2;
             int textColor = isSelected ? 0xFFFFFF : (isHovered ? 0xDDDDDD : 0x888888);
-            graphics.drawString(font, label, textX, textY, textColor, false);
+            graphics.text(font, label, textX, textY, textColor, false);
         }
     }
 
-    public void renderTabTooltips(GuiGraphics graphics, int mouseX, int mouseY) {
+    public void renderTabTooltips(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         if (!this.isHovered) return;
 
         Font font = Minecraft.getInstance().font;
@@ -85,7 +86,7 @@ public class CategoryTabWidget extends AbstractWidget {
             int index = row * COLS + col;
             if (index < CATEGORIES.length) {
                 Component tooltip = getCategoryTooltip(CATEGORIES[index]);
-                graphics.renderTooltip(font, tooltip, mouseX, mouseY);
+                graphics.setTooltipForNextFrame(font, tooltip, mouseX, mouseY);
             }
         }
     }
@@ -117,13 +118,13 @@ public class CategoryTabWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && this.isHovered) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0 && this.isHovered) {
             int tabWidth = this.width / COLS;
             int tabHeight = this.height / ROWS;
 
-            int col = (int) ((mouseX - this.getX()) / tabWidth);
-            int row = (int) ((mouseY - this.getY()) / tabHeight);
+            int col = (int) ((event.x() - this.getX()) / tabWidth);
+            int row = (int) ((event.y() - this.getY()) / tabHeight);
 
             if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
                 int index = row * COLS + col;
@@ -133,7 +134,7 @@ public class CategoryTabWidget extends AbstractWidget {
                 }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override

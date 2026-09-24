@@ -6,9 +6,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-
-import java.util.Map;
 
 public class SmeltingCalculator {
     public static class FuelCost {
@@ -31,12 +28,11 @@ public class SmeltingCalculator {
 
     public static int getBurnDuration(ItemStack stack, Level level) {
         if (stack == null || stack.isEmpty()) return 0;
-        try {
-            Map<Item, Integer> fuelMap = AbstractFurnaceBlockEntity.getFuel();
-            if (fuelMap.containsKey(stack.getItem())) {
-                return fuelMap.get(stack.getItem());
-            }
-        } catch (Throwable ignored) {}
+        if (level != null) {
+            try {
+                return level.fuelValues().burnDuration(stack);
+            } catch (Throwable ignored) {}
+        }
         // Fallback standard fuel values
         Item item = stack.getItem();
         if (item == Items.LAVA_BUCKET) return 20000;

@@ -11,10 +11,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -28,7 +29,7 @@ public class GridlessCraftingNeoForge {
         modEventBus.addListener(this::registerPayloads);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
 
-        if (FMLLoader.getDist().isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory.class,
                     () -> (container, parent) -> new GridlessConfigScreen(parent));
         }
@@ -51,7 +52,7 @@ public class GridlessCraftingNeoForge {
         );
     }
 
-    private void addReloadListeners(AddReloadListenerEvent event) {
-        event.addListener(StationRegistry.INSTANCE);
+    private void addReloadListeners(AddServerReloadListenersEvent event) {
+        event.addListener(Identifier.fromNamespaceAndPath(GridlessMod.MOD_ID, "stations"), StationRegistry.INSTANCE);
     }
 }

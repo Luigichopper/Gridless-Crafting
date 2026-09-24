@@ -1,6 +1,6 @@
 plugins {
     id "architectury-plugin" version "3.5.169"
-    id "dev.architectury.loom" version "1.17.491" apply false
+    id "dev.architectury.loom-no-remap" version "1.17.493" apply false
 }
 
 version = rootProject.mod_version + "+" + rootProject.minecraft_version
@@ -10,7 +10,7 @@ architectury {
 }
 
 subprojects {
-    apply plugin: "dev.architectury.loom"
+    apply plugin: "dev.architectury.loom-no-remap"
 
     repositories {
         mavenLocal()
@@ -47,9 +47,6 @@ subprojects {
 
     dependencies {
         minecraft "net.minecraft:minecraft:${rootProject.minecraft_version}"
-        mappings loom.layered() {
-            officialMojangMappings()
-        }
         compileOnly "com.google.code.findbugs:jsr305:3.0.2"
     }
 }
@@ -64,12 +61,12 @@ allprojects {
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = "UTF-8"
-        options.release = 21
+        options.release = Integer.parseInt(rootProject.java_version)
     }
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
+            languageVersion = JavaLanguageVersion.of(Integer.parseInt(rootProject.java_version))
         }
         withSourcesJar()
     }

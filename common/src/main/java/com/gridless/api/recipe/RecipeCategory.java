@@ -1,6 +1,8 @@
 package com.gridless.api.recipe;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.*;
 
 public enum RecipeCategory {
@@ -27,19 +29,19 @@ public enum RecipeCategory {
         if (stack.isEmpty()) return MISC;
         Item item = stack.getItem();
 
-        if (item instanceof SwordItem || item instanceof ProjectileWeaponItem || item instanceof TridentItem || item instanceof MaceItem) {
+        if (stack.is(ItemTags.SWORDS) || stack.is(ItemTags.WEAPON_ENCHANTABLE) || item instanceof ProjectileWeaponItem || item instanceof TridentItem || item instanceof MaceItem) {
             return WEAPONS;
         }
-        if (item instanceof DiggerItem || item instanceof FishingRodItem || item instanceof ShearsItem || item instanceof FlintAndSteelItem) {
+        if (stack.is(ItemTags.PICKAXES) || stack.is(ItemTags.AXES) || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES) || item instanceof FishingRodItem || item instanceof ShearsItem || item instanceof FlintAndSteelItem) {
             return TOOLS;
         }
-        if (item instanceof ArmorItem || item instanceof ShieldItem) {
+        if (stack.is(ItemTags.ARMOR_ENCHANTABLE) || stack.is(ItemTags.HEAD_ARMOR) || stack.is(ItemTags.CHEST_ARMOR) || stack.is(ItemTags.LEG_ARMOR) || stack.is(ItemTags.FOOT_ARMOR) || item instanceof ShieldItem) {
             return ARMOR;
         }
-        if (stack.has(net.minecraft.core.component.DataComponents.FOOD) || item instanceof PotionItem) {
+        if (stack.has(DataComponents.FOOD) || stack.has(DataComponents.POTION_CONTENTS)) {
             return CONSUMABLES;
         }
-        if (item instanceof BlockItem blockItem) {
+        if (item instanceof BlockItem) {
             // Check redstone vs building
             String path = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath();
             if (path.contains("redstone") || path.contains("piston") || path.contains("repeater") ||

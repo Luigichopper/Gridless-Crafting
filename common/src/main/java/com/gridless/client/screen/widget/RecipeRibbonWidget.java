@@ -5,9 +5,10 @@ import com.gridless.api.recipe.IngredientBag;
 import com.gridless.sound.GridlessSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -59,10 +60,10 @@ public class RecipeRibbonWidget extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         // Background panel
         graphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0xAA141414);
-        graphics.renderOutline(this.getX(), this.getY(), this.width, this.height, 0xFF333333);
+        graphics.outline(this.getX(), this.getY(), this.width, this.height, 0xFF333333);
 
         int maxScroll = getMaxScroll();
         int startIndex = (int) (scrollOffset / ITEM_SIZE);
@@ -89,12 +90,12 @@ public class RecipeRibbonWidget extends AbstractWidget {
             int border = isSelected ? 0xFFF4D06F : (isCraftable ? 0xFF3D5A80 : 0xFF2A2A2A);
 
             graphics.fill(itemX, itemY, itemX + itemWidth, itemY + ITEM_SIZE - 2, slotBg);
-            graphics.renderOutline(itemX, itemY, itemWidth, ITEM_SIZE - 2, border);
+            graphics.outline(itemX, itemY, itemWidth, ITEM_SIZE - 2, border);
 
             // Render Output ItemStack
             ItemStack resultStack = recipe.getResult();
-            graphics.renderItem(resultStack, itemX + 3, itemY + 2);
-            graphics.renderItemDecorations(font, resultStack, itemX + 3, itemY + 2);
+            graphics.item(resultStack, itemX + 3, itemY + 2);
+            graphics.itemDecorations(font, resultStack, itemX + 3, itemY + 2);
 
             // If not craftable, render a darkened overlay over the item
             if (!isCraftable) {
@@ -111,11 +112,11 @@ public class RecipeRibbonWidget extends AbstractWidget {
                 itemName = font.plainSubstrByWidth(itemName, maxTextWidth - 6) + "..";
             }
             int textColor = isCraftable ? (isSelected ? 0xFFFFFF : 0xE0E0E0) : 0x777777;
-            graphics.drawString(font, itemName, itemX + 24, itemY + 6, textColor, false);
+            graphics.text(font, itemName, itemX + 24, itemY + 6, textColor, false);
 
             if (recipe.getVariantCount() > 1) {
                 String varBadge = "(" + recipe.getVariantCount() + ")";
-                graphics.drawString(font, varBadge, itemX + itemWidth - font.width(varBadge) - 2, itemY + 6, 0xFFFFA726, false);
+                graphics.text(font, varBadge, itemX + itemWidth - font.width(varBadge) - 2, itemY + 6, 0xFFFFA726, false);
             }
         }
 
@@ -132,7 +133,7 @@ public class RecipeRibbonWidget extends AbstractWidget {
         }
     }
 
-    public void renderRecipeTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+    public void renderRecipeTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         if (!this.isHovered) return;
         int startIndex = (int) (scrollOffset / ITEM_SIZE);
         int visibleCount = (this.height / ITEM_SIZE) + 2;
@@ -145,7 +146,7 @@ public class RecipeRibbonWidget extends AbstractWidget {
 
             if (mouseX >= itemX && mouseX < itemX + itemWidth && mouseY >= itemY && mouseY < itemY + ITEM_SIZE && mouseY >= this.getY() && mouseY < this.getY() + this.height) {
                 GridlessRecipe recipe = recipes.get(i);
-                graphics.renderTooltip(Minecraft.getInstance().font, recipe.getResult(), mouseX, mouseY);
+                graphics.setTooltipForNextFrame(Minecraft.getInstance().font, recipe.getResult(), mouseX, mouseY);
                 break;
             }
         }
@@ -156,22 +157,22 @@ public class RecipeRibbonWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (!this.isHovered) return false;
 
         // Check scrollbar click
         int scrollbarX = this.getX() + this.width - 8;
-        if (mouseX >= scrollbarX && mouseX <= this.getX() + this.width + 4 && mouseY >= this.getY() && mouseY <= this.getY() + this.height) {
+        if (event.x() >= scrollbarX && event.x() <= this.getX() + this.width + 4 && event.y() >= this.getY() && event.y() <= this.getY() + this.height) {
             this.isDraggingScrollbar = true;
             if (getMaxScroll() > 0) {
-                double scrollRatio = (mouseY - this.getY()) / (double) this.height;
+                double scrollRatio = (event.y() - this.getY()) / (double) this.height;
                 this.scrollOffset = Mth.clamp(scrollRatio * getMaxScroll(), 0, getMaxScroll());
             }
             return true;
         }
 
         // Check recipe slot click
-        int clickedY = (int) (mouseY - this.getY() + scrollOffset);
+        int clickedY = (int) (event.y() - this.getY() + scrollOffset);
         int index = clickedY / ITEM_SIZE;
         if (index >= 0 && index < recipes.size()) {
             GridlessRecipe clicked = recipes.get(index);
@@ -180,23 +181,23 @@ public class RecipeRibbonWidget extends AbstractWidget {
             return true;
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         this.isDraggingScrollbar = false;
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
         if (this.isDraggingScrollbar && getMaxScroll() > 0) {
-            double scrollRatio = (mouseY - this.getY()) / (double) this.height;
+            double scrollRatio = (event.y() - this.getY()) / (double) this.height;
             this.scrollOffset = Mth.clamp(scrollRatio * getMaxScroll(), 0, getMaxScroll());
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override

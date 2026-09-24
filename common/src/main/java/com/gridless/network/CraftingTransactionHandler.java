@@ -11,7 +11,9 @@ import com.gridless.api.station.StationMode;
 import com.gridless.api.station.StationRegistry;
 import com.gridless.sound.GridlessSounds;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Inventory;
@@ -29,7 +31,7 @@ import java.util.Optional;
 public class CraftingTransactionHandler {
 
     public static void handleCraft(ServerPlayer player, C2SCraftGridlessRecipePayload payload) {
-        ResourceLocation recipeId = payload.recipeId();
+        Identifier recipeId = payload.recipeId();
         int requestedAmount = Math.max(1, Math.min(payload.amount(), 6400));
         Optional<BlockPos> stationPos = payload.stationPos();
         boolean isInventory = payload.isInventoryCrafting();
@@ -68,10 +70,10 @@ public class CraftingTransactionHandler {
 
         // 2. Resolve Recipe
         GridlessRecipe recipe = RecipeIndexer.get(recipeId);
-        if (recipe == null && player.server != null) {
-            Optional<RecipeHolder<?>> holderOpt = player.server.getRecipeManager().byKey(recipeId);
+        if (recipe == null && player.level().getServer() != null) {
+            Optional<RecipeHolder<?>> holderOpt = player.level().getServer().getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, recipeId));
             if (holderOpt.isPresent()) {
-                recipe = RecipeIndexer.indexSingle(holderOpt.get(), player.server.registryAccess());
+                recipe = RecipeIndexer.indexSingle(holderOpt.get(), player.level().getServer().registryAccess());
             }
         }
         if (recipe == null) {

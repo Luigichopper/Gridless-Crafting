@@ -1,7 +1,7 @@
 package com.gridless.client.gui;
 
 import com.gridless.config.GridlessConfig;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -108,25 +108,22 @@ public class GridlessConfigScreen extends Screen {
                         (button, value) -> GridlessConfig.stations.enable_crafting_table = value)));
         y += spacing;
 
-        stationsWidgets.add(this.addRenderableWidget(CycleButton.<String>builder(Component::literal)
+        stationsWidgets.add(this.addRenderableWidget(CycleButton.<String>builder(Component::literal, GridlessConfig.stations.furnace_mode)
                 .withValues("INSTANT_WITH_FUEL", "TRADITIONAL")
-                .withInitialValue(GridlessConfig.stations.furnace_mode)
                 .create(centerX - buttonWidth / 2, y, buttonWidth, buttonHeight,
                         Component.translatable("text.cloth-config.gridless_crafting.option.furnace_mode"),
                         (button, value) -> GridlessConfig.stations.furnace_mode = value)));
         y += spacing;
 
-        stationsWidgets.add(this.addRenderableWidget(CycleButton.<String>builder(Component::literal)
+        stationsWidgets.add(this.addRenderableWidget(CycleButton.<String>builder(Component::literal, GridlessConfig.stations.smoker_mode)
                 .withValues("INSTANT_WITH_FUEL", "TRADITIONAL")
-                .withInitialValue(GridlessConfig.stations.smoker_mode)
                 .create(centerX - buttonWidth / 2, y, buttonWidth, buttonHeight,
                         Component.translatable("text.cloth-config.gridless_crafting.option.smoker_mode"),
                         (button, value) -> GridlessConfig.stations.smoker_mode = value)));
         y += spacing;
 
-        stationsWidgets.add(this.addRenderableWidget(CycleButton.<String>builder(Component::literal)
+        stationsWidgets.add(this.addRenderableWidget(CycleButton.<String>builder(Component::literal, GridlessConfig.stations.blast_furnace_mode)
                 .withValues("INSTANT_WITH_FUEL", "TRADITIONAL")
-                .withInitialValue(GridlessConfig.stations.blast_furnace_mode)
                 .create(centerX - buttonWidth / 2, y, buttonWidth, buttonHeight,
                         Component.translatable("text.cloth-config.gridless_crafting.option.blast_furnace_mode"),
                         (button, value) -> GridlessConfig.stations.blast_furnace_mode = value)));
@@ -172,9 +169,9 @@ public class GridlessConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, 0xFFFFFFFF);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        graphics.centeredText(this.font, this.title, this.width / 2, 12, 0xFFFFFFFF);
     }
 
     @Override

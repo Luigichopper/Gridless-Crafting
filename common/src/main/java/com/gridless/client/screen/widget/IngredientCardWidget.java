@@ -8,9 +8,10 @@ import com.gridless.api.station.StationMode;
 import com.gridless.sound.GridlessSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -94,15 +95,15 @@ public class IngredientCardWidget extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         // Panel background
         graphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, 0xCC181818);
-        graphics.renderOutline(this.getX(), this.getY(), this.width, this.height, 0xFF3E3E3E);
+        graphics.outline(this.getX(), this.getY(), this.width, this.height, 0xFF3E3E3E);
 
         if (recipe == null) {
             Font font = Minecraft.getInstance().font;
             String text = Component.translatable("gui.gridless.select_recipe").getString();
-            graphics.drawString(font, text, this.getX() + (this.width - font.width(text)) / 2, this.getY() + this.height / 2 - 4, 0x777777, false);
+            graphics.text(font, text, this.getX() + (this.width - font.width(text)) / 2, this.getY() + this.height / 2 - 4, 0x777777, false);
             return;
         }
 
@@ -114,10 +115,10 @@ public class IngredientCardWidget extends AbstractWidget {
         int headerY = this.getY() + 4;
         int headerHeight = 22;
         graphics.fill(this.getX() + 4, headerY, this.getX() + this.width - 4, headerY + headerHeight, 0xFF2A2A2A);
-        graphics.renderOutline(this.getX() + 4, headerY, this.width - 8, headerHeight, 0xFF4A4A4A);
+        graphics.outline(this.getX() + 4, headerY, this.width - 8, headerHeight, 0xFF4A4A4A);
 
-        graphics.renderItem(output, this.getX() + 7, headerY + 3);
-        graphics.renderItemDecorations(font, output, this.getX() + 7, headerY + 3);
+        graphics.item(output, this.getX() + 7, headerY + 3);
+        graphics.itemDecorations(font, output, this.getX() + 7, headerY + 3);
 
         int variantCount = recipe.getVariantCount();
         int maxTitleWidth = this.width - (variantCount > 1 ? 86 : 38);
@@ -125,7 +126,7 @@ public class IngredientCardWidget extends AbstractWidget {
         if (font.width(title) > maxTitleWidth) {
             title = font.plainSubstrByWidth(title, maxTitleWidth - 6) + "..";
         }
-        graphics.drawString(font, title, this.getX() + 27, headerY + 7, 0xFFFFFF, false);
+        graphics.text(font, title, this.getX() + 27, headerY + 7, 0xFFFFFF, false);
 
         // Variant selector (< 1/3 >) if recipe has multiple variants
         if (variantCount > 1) {
@@ -138,20 +139,20 @@ public class IngredientCardWidget extends AbstractWidget {
             boolean hoverRight = mouseX >= btnRightX && mouseX < btnRightX + 11 && mouseY >= btnArrowY && mouseY < btnArrowY + 14;
 
             graphics.fill(btnLeftX, btnArrowY, btnLeftX + 11, btnArrowY + 14, hoverLeft ? 0xFF444444 : 0xFF333333);
-            graphics.renderOutline(btnLeftX, btnArrowY, 11, 14, hoverLeft ? 0xFFFFA726 : 0xFF555555);
-            graphics.drawString(font, "<", btnLeftX + 3, btnArrowY + 3, hoverLeft ? 0xFFFFA726 : 0xAAAAAA, false);
+            graphics.outline(btnLeftX, btnArrowY, 11, 14, hoverLeft ? 0xFFFFA726 : 0xFF555555);
+            graphics.text(font, "<", btnLeftX + 3, btnArrowY + 3, hoverLeft ? 0xFFFFA726 : 0xAAAAAA, false);
 
             String varStr = currentVariant + "/" + variantCount;
-            graphics.drawString(font, varStr, btnLeftX + 13 + (24 - font.width(varStr)) / 2, btnArrowY + 3, 0xFFFFA726, false);
+            graphics.text(font, varStr, btnLeftX + 13 + (24 - font.width(varStr)) / 2, btnArrowY + 3, 0xFFFFA726, false);
 
             graphics.fill(btnRightX, btnArrowY, btnRightX + 11, btnArrowY + 14, hoverRight ? 0xFF444444 : 0xFF333333);
-            graphics.renderOutline(btnRightX, btnArrowY, 11, 14, hoverRight ? 0xFFFFA726 : 0xFF555555);
-            graphics.drawString(font, ">", btnRightX + 3, btnArrowY + 3, hoverRight ? 0xFFFFA726 : 0xAAAAAA, false);
+            graphics.outline(btnRightX, btnArrowY, 11, 14, hoverRight ? 0xFFFFA726 : 0xFF555555);
+            graphics.text(font, ">", btnRightX + 3, btnArrowY + 3, hoverRight ? 0xFFFFA726 : 0xAAAAAA, false);
         }
 
         // 2. Ingredients Section Header
         int listHeaderY = this.getY() + 27;
-        graphics.drawString(font, Component.translatable("gui.gridless.required_materials").getString(), this.getX() + 6, listHeaderY, 0xAAAAAA, false);
+        graphics.text(font, Component.translatable("gui.gridless.required_materials").getString(), this.getX() + 6, listHeaderY, 0xAAAAAA, false);
 
         // 3. Scrollable Ingredients Viewport
         int viewportY = getViewportY();
@@ -182,9 +183,9 @@ public class IngredientCardWidget extends AbstractWidget {
 
             ItemStack displayStack = sample.copy();
             displayStack.setCount(need);
-            graphics.renderItem(displayStack, this.getX() + 6, rowY - 1);
+            graphics.item(displayStack, this.getX() + 6, rowY - 1);
             if (need > 1) {
-                graphics.renderItemDecorations(font, displayStack, this.getX() + 6, rowY - 1);
+                graphics.itemDecorations(font, displayStack, this.getX() + 6, rowY - 1);
             }
 
             String ingName = sample.isEmpty() ? "Unknown" : sample.getHoverName().getString();
@@ -196,7 +197,7 @@ public class IngredientCardWidget extends AbstractWidget {
                 ingName = font.plainSubstrByWidth(ingName, maxNameWidth - 6) + "..";
             }
 
-            graphics.drawString(font, ingName, this.getX() + 24, rowY + 3, hasEnough ? 0xDDDDDD : 0xAAAAAA, false);
+            graphics.text(font, ingName, this.getX() + 24, rowY + 3, hasEnough ? 0xDDDDDD : 0xAAAAAA, false);
 
             String countStr;
             int countColor;
@@ -210,7 +211,7 @@ public class IngredientCardWidget extends AbstractWidget {
             }
 
             int countWidth = font.width(countStr);
-            graphics.drawString(font, countStr, this.getX() + rightClip - countWidth, rowY + 3, countColor, false);
+            graphics.text(font, countStr, this.getX() + rightClip - countWidth, rowY + 3, countColor, false);
         }
 
         // Smelting Fuel Row inside the viewport
@@ -219,19 +220,19 @@ public class IngredientCardWidget extends AbstractWidget {
             if (rowY + ROW_HEIGHT >= viewportY && rowY <= viewportY + viewportHeight) {
                 SmeltingCalculator.FuelCost fuelCost = SmeltingCalculator.calculateFuelCost(mc.player, 1, recipe.getCookTime());
                 ItemStack fuelStack = new ItemStack(fuelCost.recommendedFuel);
-                graphics.renderItem(fuelStack, this.getX() + 6, rowY - 1);
+                graphics.item(fuelStack, this.getX() + 6, rowY - 1);
 
                 String fuelName = Component.translatable("gui.gridless.fuel", fuelCost.recommendedFuel.getName(fuelStack).getString(), fuelCost.fuelItemsNeeded).getString();
                 int maxNameWidth = this.width - (maxScroll > 0 ? 86 : 76);
                 if (font.width(fuelName) > maxNameWidth) {
                     fuelName = font.plainSubstrByWidth(fuelName, maxNameWidth - 6) + "..";
                 }
-                graphics.drawString(font, fuelName, this.getX() + 24, rowY + 3, fuelCost.hasEnough ? 0xFFFFA726 : 0xFFE57373, false);
+                graphics.text(font, fuelName, this.getX() + 24, rowY + 3, fuelCost.hasEnough ? 0xFFFFA726 : 0xFFE57373, false);
 
                 int haveFuelCount = bag.getCount(fuelCost.recommendedFuel);
                 String fuelCountStr = haveFuelCount + "/" + fuelCost.fuelItemsNeeded;
                 int fuelCountWidth = font.width(fuelCountStr);
-                graphics.drawString(font, fuelCountStr, this.getX() + rightClip - fuelCountWidth, rowY + 3, fuelCost.hasEnough ? 0xFFFFA726 : 0xFFE57373, false);
+                graphics.text(font, fuelCountStr, this.getX() + rightClip - fuelCountWidth, rowY + 3, fuelCost.hasEnough ? 0xFFFFA726 : 0xFFE57373, false);
             }
         }
 
@@ -267,21 +268,21 @@ public class IngredientCardWidget extends AbstractWidget {
         boolean btn1Hovered = mouseX >= btn1X && mouseX < btn1X + btnWidth && mouseY >= btnY && mouseY < btnY + btnHeight;
         int btn1Color = canCraft ? (btn1Hovered ? 0xFF388E3C : 0xFF2E7D32) : 0xFF333333;
         graphics.fill(btn1X, btnY, btn1X + btnWidth, btnY + btnHeight, btn1Color);
-        graphics.renderOutline(btn1X, btnY, btnWidth, btnHeight, canCraft ? 0xFF81C784 : 0xFF444444);
+        graphics.outline(btn1X, btnY, btnWidth, btnHeight, canCraft ? 0xFF81C784 : 0xFF444444);
         String btn1Text = Component.translatable("gui.gridless.craft_x1").getString();
-        graphics.drawString(font, btn1Text, btn1X + (btnWidth - font.width(btn1Text)) / 2, btnY + 5, canCraft ? 0xFFFFFF : 0x777777, false);
+        graphics.text(font, btn1Text, btn1X + (btnWidth - font.width(btn1Text)) / 2, btnY + 5, canCraft ? 0xFFFFFF : 0x777777, false);
 
         // Button 2: Craft Max
         int btn2X = btn1X + btnWidth + 6;
         boolean btn2Hovered = mouseX >= btn2X && mouseX < btn2X + btnWidth && mouseY >= btnY && mouseY < btnY + btnHeight;
         int btn2Color = canCraft && maxCraft > 0 ? (btn2Hovered ? 0xFF1976D2 : 0xFF1565C0) : 0xFF333333;
         graphics.fill(btn2X, btnY, btn2X + btnWidth, btnY + btnHeight, btn2Color);
-        graphics.renderOutline(btn2X, btnY, btnWidth, btnHeight, canCraft && maxCraft > 0 ? 0xFF64B5F6 : 0xFF444444);
+        graphics.outline(btn2X, btnY, btnWidth, btnHeight, canCraft && maxCraft > 0 ? 0xFF64B5F6 : 0xFF444444);
         String btn2Text = Component.translatable("gui.gridless.craft_max", maxCraft).getString();
-        graphics.drawString(font, btn2Text, btn2X + (btnWidth - font.width(btn2Text)) / 2, btnY + 5, canCraft && maxCraft > 0 ? 0xFFFFFF : 0x777777, false);
+        graphics.text(font, btn2Text, btn2X + (btnWidth - font.width(btn2Text)) / 2, btnY + 5, canCraft && maxCraft > 0 ? 0xFFFFFF : 0x777777, false);
     }
 
-    public void renderIngredientTooltips(GuiGraphics graphics, int mouseX, int mouseY) {
+    public void renderIngredientTooltips(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         if (!this.isHovered || recipe == null) return;
         Minecraft mc = Minecraft.getInstance();
         Font font = mc.font;
@@ -289,7 +290,7 @@ public class IngredientCardWidget extends AbstractWidget {
         // Check output item tooltip
         int headerY = this.getY() + 4;
         if (mouseX >= this.getX() + 7 && mouseX < this.getX() + 25 && mouseY >= headerY + 3 && mouseY < headerY + 21) {
-            graphics.renderTooltip(font, recipe.getResult(), mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, recipe.getResult(), mouseX, mouseY);
             return;
         }
 
@@ -297,7 +298,7 @@ public class IngredientCardWidget extends AbstractWidget {
         if (recipe.getVariantCount() > 1) {
             int btnLeftX = this.getX() + this.width - 56;
             if (mouseX >= btnLeftX && mouseX < this.getX() + this.width - 7 && mouseY >= headerY + 4 && mouseY < headerY + 18) {
-                graphics.renderTooltip(font, Component.translatable("gui.gridless.variant_tooltip", recipe.getActiveVariantIndex() + 1, recipe.getVariantCount()), mouseX, mouseY);
+                graphics.setTooltipForNextFrame(font, Component.translatable("gui.gridless.variant_tooltip", recipe.getActiveVariantIndex() + 1, recipe.getVariantCount()), mouseX, mouseY);
                 return;
             }
         }
@@ -323,7 +324,7 @@ public class IngredientCardWidget extends AbstractWidget {
             if (!sample.isEmpty() && mouseX >= this.getX() + 6 && mouseX < this.getX() + 22 && mouseY >= rowY && mouseY < rowY + 16) {
                 ItemStack tipStack = sample.copy();
                 tipStack.setCount(input.getCount());
-                graphics.renderTooltip(font, tipStack, mouseX, mouseY);
+                graphics.setTooltipForNextFrame(font, tipStack, mouseX, mouseY);
                 return;
             }
         }
@@ -335,7 +336,7 @@ public class IngredientCardWidget extends AbstractWidget {
                 SmeltingCalculator.FuelCost fuelCost = SmeltingCalculator.calculateFuelCost(mc.player, 1, recipe.getCookTime());
                 ItemStack fuelStack = new ItemStack(fuelCost.recommendedFuel);
                 if (mouseX >= this.getX() + 6 && mouseX < this.getX() + 22 && mouseY >= rowY && mouseY < rowY + 16) {
-                    graphics.renderTooltip(font, fuelStack, mouseX, mouseY);
+                    graphics.setTooltipForNextFrame(font, fuelStack, mouseX, mouseY);
                 }
             }
         }
@@ -365,23 +366,23 @@ public class IngredientCardWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (!this.isHovered || recipe == null) return false;
 
         int headerY = this.getY() + 4;
         // Variant switch buttons
-        if (recipe.getVariantCount() > 1 && button == 0) {
+        if (recipe.getVariantCount() > 1 && event.button() == 0) {
             int btnLeftX = this.getX() + this.width - 56;
             int btnRightX = this.getX() + this.width - 18;
             int btnArrowY = headerY + 4;
 
-            if (mouseX >= btnLeftX && mouseX < btnLeftX + 11 && mouseY >= btnArrowY && mouseY < btnArrowY + 14) {
+            if (event.x() >= btnLeftX && event.x() < btnLeftX + 11 && event.y() >= btnArrowY && event.y() < btnArrowY + 14) {
                 recipe.cycleVariant(-1);
                 variantCycleTicks = 0;
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(GridlessSounds.RECIPE_SELECT, 1.0f));
                 return true;
             }
-            if (mouseX >= btnRightX && mouseX < btnRightX + 11 && mouseY >= btnArrowY && mouseY < btnArrowY + 14) {
+            if (event.x() >= btnRightX && event.x() < btnRightX + 11 && event.y() >= btnArrowY && event.y() < btnArrowY + 14) {
                 recipe.cycleVariant(1);
                 variantCycleTicks = 0;
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(GridlessSounds.RECIPE_SELECT, 1.0f));
@@ -393,7 +394,7 @@ public class IngredientCardWidget extends AbstractWidget {
         int maxScroll = getMaxScroll();
         int viewportY = getViewportY();
         int viewportHeight = getViewportHeight();
-        if (maxScroll > 0 && mouseX >= this.getX() + this.width - 8 && mouseX <= this.getX() + this.width && mouseY >= viewportY && mouseY < viewportY + viewportHeight) {
+        if (maxScroll > 0 && event.x() >= this.getX() + this.width - 8 && event.x() <= this.getX() + this.width && event.y() >= viewportY && event.y() <= viewportY + viewportHeight) {
             isDraggingScrollbar = true;
             return true;
         }
@@ -418,11 +419,11 @@ public class IngredientCardWidget extends AbstractWidget {
         int btn2X = btn1X + btnWidth + 6;
 
         // Check Craft 1
-        if (mouseX >= btn1X && mouseX < btn1X + btnWidth && mouseY >= btnY && mouseY < btnY + btnHeight) {
+        if (event.x() >= btn1X && event.x() < btn1X + btnWidth && event.y() >= btnY && event.y() < btnY + btnHeight) {
             if (canCraft) {
-                if (button == 0) {
+                if (event.button() == 0) {
                     onCraftRequested.accept(recipe, 1);
-                } else if (button == 1) { // Rapid craft hold
+                } else if (event.button() == 1) { // Rapid craft hold
                     isHoldingCraft = true;
                     onCraftRequested.accept(recipe, 1);
                 }
@@ -433,7 +434,7 @@ public class IngredientCardWidget extends AbstractWidget {
         }
 
         // Check Craft Max
-        if (mouseX >= btn2X && mouseX < btn2X + btnWidth && mouseY >= btnY && mouseY < btnY + btnHeight) {
+        if (event.x() >= btn2X && event.x() < btn2X + btnWidth && event.y() >= btnY && event.y() < btnY + btnHeight) {
             if (canCraft && maxCraft > 0) {
                 onCraftRequested.accept(recipe, maxCraft);
             } else {
@@ -442,11 +443,11 @@ public class IngredientCardWidget extends AbstractWidget {
             return true;
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
         if (isDraggingScrollbar) {
             int maxScroll = getMaxScroll();
             int viewportHeight = getViewportHeight();
@@ -458,15 +459,15 @@ public class IngredientCardWidget extends AbstractWidget {
             }
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         isDraggingScrollbar = false;
         isHoldingCraft = false;
         holdTicks = 0;
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
 
     @Override

@@ -25,6 +25,8 @@ public class CountedIngredient {
     }
 
     public ItemStack[] getMatchingStacks() {
-        return ingredient.getItems();
+        return ingredient.items()
+                .map(holder -> new ItemStack(holder.value()))
+                .toArray(ItemStack[]::new);
     }
 }

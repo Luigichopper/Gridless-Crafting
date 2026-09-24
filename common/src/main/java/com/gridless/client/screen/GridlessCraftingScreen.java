@@ -19,19 +19,23 @@ import com.gridless.network.C2SCraftGridlessRecipePayload;
 import com.gridless.platform.Services;
 import com.gridless.sound.GridlessSounds;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
@@ -54,12 +58,10 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
     private RecipeCategory currentCategory = RecipeCategory.ALL;
 
     public GridlessCraftingScreen(T menu, Inventory playerInventory, Component title, GridlessStation station, Optional<BlockPos> stationPos, boolean isInventoryCrafting) {
-        super(menu, playerInventory, title);
+        super(menu, playerInventory, title, 368, 240);
         this.station = station != null ? station : StationRegistry.get(StationRegistry.INVENTORY);
         this.stationPos = stationPos != null ? stationPos : Optional.empty();
         this.isInventoryCrafting = isInventoryCrafting;
-        this.imageWidth = 368;
-        this.imageHeight = 240;
     }
 
     public GridlessCraftingScreen(T menu, Inventory playerInventory, Component title) {
@@ -197,12 +199,12 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
     }
 
     private void refreshStationRecipes() {
-        if (RecipeIndexer.getAll().isEmpty() && this.minecraft != null && this.minecraft.getConnection() != null && this.minecraft.level != null) {
-            RecipeIndexer.reindex(this.minecraft.getConnection().getRecipeManager(), this.minecraft.level.registryAccess());
+        if (RecipeIndexer.getAll().isEmpty() && this.minecraft != null && this.minecraft.hasSingleplayerServer() && this.minecraft.getSingleplayerServer() != null && this.minecraft.level != null) {
+            RecipeIndexer.reindex(this.minecraft.getSingleplayerServer().getRecipeManager(), this.minecraft.level.registryAccess());
         }
 
         if (this.isInventoryCrafting || (this.station != null && this.station.getId().equals(StationRegistry.INVENTORY))) {
-            allStationRecipes = new ArrayList<>(RecipeIndexer.getForTypes(List.of(ResourceLocation.fromNamespaceAndPath("minecraft", "crafting"))));
+            allStationRecipes = new ArrayList<>(RecipeIndexer.getForTypes(List.of(Identifier.fromNamespaceAndPath("minecraft", "crafting"))));
             allStationRecipes.removeIf(GridlessRecipe::requires3x3);
             for (GridlessRecipe r : allStationRecipes) {
                 r.remove3x3Variants();
@@ -321,85 +323,83 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (this.searchBox != null) {
-            boolean insideSearch = mouseX >= this.searchBox.getX() && mouseX < this.searchBox.getX() + this.searchBox.getWidth()
-                    && mouseY >= this.searchBox.getY() && mouseY < this.searchBox.getY() + this.searchBox.getHeight();
+            boolean insideSearch = event.x() >= this.searchBox.getX() && event.x() < this.searchBox.getX() + this.searchBox.getWidth()
+                    && event.y() >= this.searchBox.getY() && event.y() < this.searchBox.getY() + this.searchBox.getHeight();
             if (insideSearch) {
-                if (button == 1) { // Right-click clears search
+                if (event.button() == 1) { // Right-click clears search
                     this.searchBox.setValue("");
                 }
                 this.searchBox.setFocused(true);
                 this.setFocused(this.searchBox);
-            } else if (button == 0) {
+            } else if (event.button() == 0) {
                 this.searchBox.setFocused(false);
                 if (this.getFocused() == this.searchBox) {
                     this.setFocused(null);
                 }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        if (this.recipeRibbon != null && (this.recipeRibbon.isDraggingScrollbar() || this.recipeRibbon.isMouseOver(mouseX, mouseY))) {
-            if (this.recipeRibbon.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
+    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        if (this.recipeRibbon != null && (this.recipeRibbon.isDraggingScrollbar() || this.recipeRibbon.isMouseOver(event.x(), event.y()))) {
+            if (this.recipeRibbon.mouseDragged(event, dragX, dragY)) {
                 return true;
             }
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent event) {
         if (this.recipeRibbon != null) {
-            this.recipeRibbon.mouseReleased(mouseX, mouseY, button);
+            this.recipeRibbon.mouseReleased(event);
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (this.searchBox != null && this.searchBox.isFocused() && this.searchBox.isVisible()) {
-            if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE) {
+            if (event.key() == GLFW.GLFW_KEY_ESCAPE) {
                 this.searchBox.setFocused(false);
                 if (this.getFocused() == this.searchBox) {
                     this.setFocused(null);
                 }
-                return super.keyPressed(keyCode, scanCode, modifiers);
+                return super.keyPressed(event);
             }
-            if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER || keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER) {
+            if (event.key() == GLFW.GLFW_KEY_ENTER || event.key() == GLFW.GLFW_KEY_KP_ENTER) {
                 this.searchBox.setFocused(false);
                 if (this.getFocused() == this.searchBox) {
                     this.setFocused(null);
                 }
                 return true;
             }
-            if (this.searchBox.keyPressed(keyCode, scanCode, modifiers)) {
+            if (this.searchBox.keyPressed(event)) {
                 return true;
             }
             // Consume all other key presses while search box is focused so inventory/gameplay keybinds ('E', 'Q', 1-9) do not trigger
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean charTyped(char codePoint, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (this.searchBox != null && this.searchBox.isFocused() && this.searchBox.isVisible()) {
-            if (this.searchBox.charTyped(codePoint, modifiers)) {
+            if (this.searchBox.charTyped(event)) {
                 return true;
             }
         }
-        return super.charTyped(codePoint, modifiers);
+        return super.charTyped(event);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        this.renderTooltip(graphics, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         // Tooltips for tabs, recipe ribbon items, and ingredient items
         if (this.categoryTabs != null) {
@@ -418,19 +418,20 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
             int fuelSlotX = this.leftPos + GridlessCraftingMenu.INV_X - 1;
             int fuelSlotY = this.topPos + GridlessCraftingMenu.HOTBAR_Y - 1;
             if (mouseX >= fuelSlotX && mouseX < fuelSlotX + 18 && mouseY >= fuelSlotY - 9 && mouseY < fuelSlotY) {
-                graphics.renderTooltip(this.font, Component.translatable("gui.gridless.fuel_tooltip"), mouseX, mouseY);
+                graphics.setTooltipForNextFrame(this.font, Component.translatable("gui.gridless.fuel_tooltip"), mouseX, mouseY);
             }
         }
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         int left = this.leftPos;
         int top = this.topPos;
 
         // Main window backdrop
         graphics.fill(left, top, left + this.imageWidth, top + this.imageHeight, 0xEE121212);
-        graphics.renderOutline(left, top, this.imageWidth, this.imageHeight, 0xFF4A4A4A);
+        graphics.outline(left, top, this.imageWidth, this.imageHeight, 0xFF4A4A4A);
 
         // Player Inventory Section Backdrop (bottom right)
         int invBoxX = left + 176;
@@ -438,9 +439,9 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
         int invBoxWidth = 184;
         int invBoxHeight = 98;
         graphics.fill(invBoxX, invBoxY, invBoxX + invBoxWidth, invBoxY + invBoxHeight, 0xCC1E1E1E);
-        graphics.renderOutline(invBoxX, invBoxY, invBoxWidth, invBoxHeight, 0xFF3A3A3A);
+        graphics.outline(invBoxX, invBoxY, invBoxWidth, invBoxHeight, 0xFF3A3A3A);
 
-        graphics.drawString(this.font, Component.translatable("gui.gridless.inventory").getString(), invBoxX + 8, invBoxY + 4, 0x888888, false);
+        graphics.text(this.font, Component.translatable("gui.gridless.inventory").getString(), invBoxX + 8, invBoxY + 4, 0x888888, false);
 
         // Slot background boxes (18x18 each) - Main inventory 3 rows x 9 cols
         for (int row = 0; row < 3; row++) {
@@ -448,7 +449,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
                 int slotX = left + GridlessCraftingMenu.INV_X + col * 18 - 1;
                 int slotY = top + GridlessCraftingMenu.INV_Y + row * 18 - 1;
                 graphics.fill(slotX, slotY, slotX + 18, slotY + 18, 0xFF141414);
-                graphics.renderOutline(slotX, slotY, 18, 18, 0xFF353535);
+                graphics.outline(slotX, slotY, 18, 18, 0xFF353535);
             }
         }
 
@@ -457,7 +458,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
             int slotX = left + GridlessCraftingMenu.INV_X + col * 18 - 1;
             int slotY = top + GridlessCraftingMenu.HOTBAR_Y - 1;
             graphics.fill(slotX, slotY, slotX + 18, slotY + 18, 0xFF141414);
-            graphics.renderOutline(slotX, slotY, 18, 18, 0xFF353535);
+            graphics.outline(slotX, slotY, 18, 18, 0xFF353535);
         }
 
         // Highlight inventory slots containing required ingredients for the currently selected recipe
@@ -481,7 +482,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
                             int sY = top + slot.y - 1;
                             // Emerald Green highlight overlay & outline around inventory slots with required ingredients
                             graphics.fill(sX, sY, sX + 18, sY + 18, 0x3300E676);
-                            graphics.renderOutline(sX, sY, 18, 18, 0xFF00E676);
+                            graphics.outline(sX, sY, 18, 18, 0xFF00E676);
                         }
                     }
                 }
@@ -497,11 +498,11 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
             // Orange tab on top of the first hotbar slot (slot 0)
             int tabY = fuelSlotY - 9;
             graphics.fill(fuelSlotX, tabY, fuelSlotX + 18, fuelSlotY, 0xFFFF6F00); // Amber orange
-            graphics.renderOutline(fuelSlotX, tabY, 18, 10, 0xFFFFB300);
-            graphics.drawString(this.font, "🔥", fuelSlotX + 5, tabY + 1, 0xFFFFFF, false);
+            graphics.outline(fuelSlotX, tabY, 18, 10, 0xFFFFB300);
+            graphics.text(this.font, "🔥", fuelSlotX + 5, tabY + 1, 0xFFFFFF, false);
 
             // Orange highlight around designated fuel slot (slot 0)
-            graphics.renderOutline(fuelSlotX, fuelSlotY, 18, 18, 0xFFFF8C00);
+            graphics.outline(fuelSlotX, fuelSlotY, 18, 18, 0xFFFF8C00);
 
             // If another slot is currently the active primary fuel, also highlight it
             if (this.minecraft != null && this.minecraft.player != null) {
@@ -517,7 +518,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
                         aSlotX = left + GridlessCraftingMenu.INV_X + c * 18 - 1;
                         aSlotY = top + GridlessCraftingMenu.INV_Y + r * 18 - 1;
                     }
-                    graphics.renderOutline(aSlotX, aSlotY, 18, 18, 0xFFFF8C00);
+                    graphics.outline(aSlotX, aSlotY, 18, 18, 0xFFFF8C00);
                 }
             }
         }
@@ -539,7 +540,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Suppress standard vanilla label rendering since custom widgets handle title and inventory
     }
 }

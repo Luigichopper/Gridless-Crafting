@@ -4,7 +4,7 @@ import com.gridless.GridlessMod;
 import com.gridless.network.C2SCraftGridlessRecipePayload;
 import com.gridless.network.CraftingTransactionHandler;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.Channel;
 import net.minecraftforge.network.ChannelBuilder;
@@ -14,7 +14,7 @@ public class ForgeNetworkHandler {
     private static Channel<CustomPacketPayload> CHANNEL;
 
     public static void init() {
-        CHANNEL = ChannelBuilder.named(ResourceLocation.fromNamespaceAndPath(GridlessMod.MOD_ID, "main"))
+        CHANNEL = ChannelBuilder.named(Identifier.fromNamespaceAndPath(GridlessMod.MOD_ID, "main"))
                 .networkProtocolVersion(1)
                 .acceptedVersions(Channel.VersionTest.exact(1))
                 .payloadChannel()
