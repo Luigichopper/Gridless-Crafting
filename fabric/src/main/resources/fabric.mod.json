@@ -3,7 +3,8 @@
   "id": "gridless",
   "version": "${version}",
   "name": "Gridless Crafting",
-  "description": "Terraria-style gridless crafting and station overhaul for Minecraft.",
+  "description": "A list-based gridless crafting and smelting overhaul for Minecraft!",
+  "icon": "assets/gridless/icon.png",
   "authors": [
     "Luigi"
   ],

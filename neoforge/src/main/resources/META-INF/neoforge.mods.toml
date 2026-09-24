@@ -6,7 +6,8 @@ license="MIT"
 modId="gridless"
 version="${version}"
 displayName="Gridless Crafting"
-description="Terraria-style gridless crafting and station overhaul for Minecraft."
+description="A list-based gridless crafting and smelting overhaul for Minecraft!"
+logoFile="assets/gridless/icon.png"
 authors="Luigi"
 
 [[dependencies.gridless]]
