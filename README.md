@@ -1,6 +1,6 @@
 # Gridless Crafting
 
-![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen?style=flat-square)
+![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.4-brightgreen?style=flat-square)
 ![Mod Loaders](https://img.shields.io/badge/Loaders-Fabric%20%7C%20Forge%20%7C%20NeoForge-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![Java Version](https://img.shields.io/badge/Java-21-orange?style=flat-square)
@@ -28,7 +28,7 @@ Third-party mod developers can compile against the API JAR:
 
 ```groovy
 dependencies {
-    compileOnly files("libs/gridless-crafting-1.0.0+1.21.1-api.jar")
+    compileOnly files("libs/gridless-crafting-1.0.0+1.21.4-api.jar")
 }
 ```
 
