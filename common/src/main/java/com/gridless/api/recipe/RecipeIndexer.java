@@ -14,11 +14,16 @@ public class RecipeIndexer {
     private static final Map<ResourceLocation, GridlessRecipe> INDEXED_RECIPES = new ConcurrentHashMap<>();
     private static final Map<RecipeType<?>, List<GridlessRecipe>> BY_TYPE = new ConcurrentHashMap<>();
 
-    public static void reindex(RecipeManager recipeManager, HolderLookup.Provider registries) {
+    public static void reindex(RecipeAccess recipeAccess, HolderLookup.Provider registries) {
         INDEXED_RECIPES.clear();
         BY_TYPE.clear();
 
-        Collection<RecipeHolder<?>> holders = recipeManager.getRecipes();
+        Collection<RecipeHolder<?>> holders;
+        if (recipeAccess instanceof RecipeMap map) {
+            holders = map.values();
+        } else {
+            holders = Collections.emptyList();
+        }
         GridlessMod.LOGGER.info("Indexing {} vanilla recipes for Gridless Crafting...", holders.size());
 
         for (RecipeHolder<?> holder : holders) {
@@ -98,31 +103,34 @@ public class RecipeIndexer {
 
     public static GridlessRecipe indexRecipe(RecipeHolder<?> holder, HolderLookup.Provider registries) {
         Recipe<?> recipe = holder.value();
-        ResourceLocation id = holder.id();
+        ResourceLocation id = holder.id().location();
         RecipeType<?> type = recipe.getType();
 
-        ItemStack output;
+        ItemStack output = ItemStack.EMPTY;
         try {
-            output = recipe.getResultItem(registries != null ? registries : HolderLookup.Provider.create(java.util.stream.Stream.empty()));
+            if (recipe instanceof ShapedRecipe shaped) {
+                output = ((com.gridless.mixin.ShapedRecipeAccessor) shaped).getResult();
+            } else if (recipe instanceof ShapelessRecipe shapeless) {
+                output = ((com.gridless.mixin.ShapelessRecipeAccessor) shapeless).getResult();
+            } else if (recipe instanceof SingleItemRecipe single) {
+                output = ((com.gridless.mixin.SingleItemRecipeAccessor) single).getResult();
+            }
         } catch (Exception e) {
             return null;
         }
         if (output == null || output.isEmpty()) return null;
 
-        // Use Minecraft's native dimension check: returns true if it can be crafted in 2x2
-        boolean fitsIn2x2 = recipe.canCraftInDimensions(2, 2);
-        boolean requires3x3 = !fitsIn2x2;
+        boolean requires3x3 = false;
+        if (recipe instanceof ShapedRecipe shaped) {
+            requires3x3 = shaped.getWidth() > 2 || shaped.getHeight() > 2;
+        }
 
         List<CountedIngredient> inputs;
-        if (recipe instanceof ShapedRecipe shaped) {
-            inputs = consolidateIngredients(shaped.getIngredients());
-        } else if (recipe instanceof ShapelessRecipe shapeless) {
-            inputs = consolidateIngredients(shapeless.getIngredients());
-        } else if (recipe instanceof AbstractCookingRecipe cooking) {
-            inputs = consolidateIngredients(cooking.getIngredients());
-            return new GridlessRecipe(id, output, inputs, type, RecipeCategory.classify(output), cooking.getCookingTime(), cooking.getExperience(), false);
-        } else {
-            inputs = consolidateIngredients(recipe.getIngredients());
+        List<Ingredient> ingredients = recipe.placementInfo().ingredients();
+        inputs = consolidateIngredients(ingredients);
+
+        if (recipe instanceof AbstractCookingRecipe cooking) {
+            return new GridlessRecipe(id, output, inputs, type, RecipeCategory.classify(output), cooking.cookingTime(), cooking.experience(), false);
         }
 
         if (inputs.isEmpty()) return null;
@@ -130,7 +138,7 @@ public class RecipeIndexer {
         return new GridlessRecipe(id, output, inputs, type, RecipeCategory.classify(output), 0, 0f, requires3x3);
     }
 
-    private static List<CountedIngredient> consolidateIngredients(NonNullList<Ingredient> list) {
+    private static List<CountedIngredient> consolidateIngredients(List<Ingredient> list) {
         List<CountedIngredient> result = new ArrayList<>();
 
         for (Ingredient ing : list) {

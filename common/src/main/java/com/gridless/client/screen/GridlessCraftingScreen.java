@@ -198,7 +198,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
 
     private void refreshStationRecipes() {
         if (RecipeIndexer.getAll().isEmpty() && this.minecraft != null && this.minecraft.getConnection() != null && this.minecraft.level != null) {
-            RecipeIndexer.reindex(this.minecraft.getConnection().getRecipeManager(), this.minecraft.level.registryAccess());
+            RecipeIndexer.reindex(this.minecraft.getConnection().recipes(), this.minecraft.level.registryAccess());
         }
 
         if (this.isInventoryCrafting || (this.station != null && this.station.getId().equals(StationRegistry.INVENTORY))) {

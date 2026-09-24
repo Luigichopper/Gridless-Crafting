@@ -53,11 +53,7 @@ public class InventoryScreenMixin {
         AbstractContainerScreenAccessor accessor = (AbstractContainerScreenAccessor) self;
         Minecraft mc = Minecraft.getInstance();
 
-        // 1. Remove 2x2 crafting grid, recipe book, and adjust centering if configured
         if (GridlessConfig.general.remove_crafting_inventory) {
-            if (self.getRecipeBookComponent().isVisible()) {
-                self.getRecipeBookComponent().toggleVisibility();
-            }
             accessor.setLeftPos((self.width - accessor.getImageWidth()) / 2);
 
             List<? extends GuiEventListener> currentChildren = new ArrayList<>(self.children());

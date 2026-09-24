@@ -39,8 +39,8 @@ public class GridlessCraftingFabric implements ModInitializer {
             }
 
             @Override
-            public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager resourceManager, ProfilerFiller prepProfiler, ProfilerFiller reloadProfiler, Executor bgExecutor, Executor gameExecutor) {
-                return StationRegistry.INSTANCE.reload(barrier, resourceManager, prepProfiler, reloadProfiler, bgExecutor, gameExecutor);
+            public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager resourceManager, Executor bgExecutor, Executor gameExecutor) {
+                return StationRegistry.INSTANCE.reload(barrier, resourceManager, bgExecutor, gameExecutor);
             }
         });
     }

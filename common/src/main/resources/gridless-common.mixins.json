@@ -5,7 +5,10 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "RecipeManagerMixin",
-    "InventoryMenuMixin"
+    "InventoryMenuMixin",
+    "SingleItemRecipeAccessor",
+    "ShapedRecipeAccessor",
+    "ShapelessRecipeAccessor"
   ],
   "client": [
     "CraftingScreenMixin",

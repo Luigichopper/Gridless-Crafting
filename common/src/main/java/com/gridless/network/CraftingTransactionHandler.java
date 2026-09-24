@@ -69,7 +69,8 @@ public class CraftingTransactionHandler {
         // 2. Resolve Recipe
         GridlessRecipe recipe = RecipeIndexer.get(recipeId);
         if (recipe == null && player.server != null) {
-            Optional<RecipeHolder<?>> holderOpt = player.server.getRecipeManager().byKey(recipeId);
+            net.minecraft.resources.ResourceKey<net.minecraft.world.item.crafting.Recipe<?>> key = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, recipeId);
+            Optional<RecipeHolder<?>> holderOpt = player.server.getRecipeManager().byKey(key);
             if (holderOpt.isPresent()) {
                 recipe = RecipeIndexer.indexSingle(holderOpt.get(), player.server.registryAccess());
             }

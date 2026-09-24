@@ -25,6 +25,9 @@ public class CountedIngredient {
     }
 
     public ItemStack[] getMatchingStacks() {
-        return ingredient.getItems();
+        return ingredient.items()
+                .map(net.minecraft.core.Holder::value)
+                .map(ItemStack::new)
+                .toArray(ItemStack[]::new);
     }
 }

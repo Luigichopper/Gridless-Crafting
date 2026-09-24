@@ -31,12 +31,6 @@ public class SmeltingCalculator {
 
     public static int getBurnDuration(ItemStack stack, Level level) {
         if (stack == null || stack.isEmpty()) return 0;
-        try {
-            Map<Item, Integer> fuelMap = AbstractFurnaceBlockEntity.getFuel();
-            if (fuelMap.containsKey(stack.getItem())) {
-                return fuelMap.get(stack.getItem());
-            }
-        } catch (Throwable ignored) {}
         // Fallback standard fuel values
         Item item = stack.getItem();
         if (item == Items.LAVA_BUCKET) return 20000;

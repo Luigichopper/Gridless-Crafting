@@ -8,14 +8,14 @@ import com.gridless.GridlessMod;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class StationRegistry extends SimpleJsonResourceReloadListener {
+public class StationRegistry extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
     private static final Gson GSON = new Gson();
     public static final String DIRECTORY = "gridless_stations";
     public static final StationRegistry INSTANCE = new StationRegistry();
@@ -34,7 +34,22 @@ public class StationRegistry extends SimpleJsonResourceReloadListener {
     }
 
     public StationRegistry() {
-        super(GSON, DIRECTORY);
+    }
+
+    @Override
+    protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+        Map<ResourceLocation, JsonElement> map = new HashMap<>();
+        FileToIdConverter converter = FileToIdConverter.json(DIRECTORY);
+        for (Map.Entry<ResourceLocation, net.minecraft.server.packs.resources.Resource> entry : converter.listMatchingResources(resourceManager).entrySet()) {
+            ResourceLocation id = converter.fileToId(entry.getKey());
+            try (java.io.Reader reader = entry.getValue().openAsReader()) {
+                JsonElement json = com.google.gson.JsonParser.parseReader(reader);
+                map.put(id, json);
+            } catch (Exception e) {
+                GridlessMod.LOGGER.error("Failed to read station JSON: {}", entry.getKey(), e);
+            }
+        }
+        return map;
     }
 
     public static void registerDefaults() {

@@ -19,9 +19,9 @@ public class GridlessSounds {
     }
 
     public static void register(BiConsumer<ResourceLocation, SoundEvent> consumer) {
-        consumer.accept(CRAFT_CLICK.getLocation(), CRAFT_CLICK);
-        consumer.accept(RECIPE_SELECT.getLocation(), RECIPE_SELECT);
-        consumer.accept(CRAFT_FAIL.getLocation(), CRAFT_FAIL);
+        consumer.accept(CRAFT_CLICK.location(), CRAFT_CLICK);
+        consumer.accept(RECIPE_SELECT.location(), RECIPE_SELECT);
+        consumer.accept(CRAFT_FAIL.location(), CRAFT_FAIL);
     }
 
     public static void init() {

@@ -14,6 +14,6 @@ public class ClientPacketListenerMixin {
     @Inject(method = "handleUpdateTags", at = @At("TAIL"))
     private void onUpdateTags(ClientboundUpdateTagsPacket packet, CallbackInfo ci) {
         ClientPacketListener self = (ClientPacketListener) (Object) this;
-        RecipeIndexer.reindex(self.getRecipeManager(), self.registryAccess());
+        RecipeIndexer.reindex(self.recipes(), self.registryAccess());
     }
 }

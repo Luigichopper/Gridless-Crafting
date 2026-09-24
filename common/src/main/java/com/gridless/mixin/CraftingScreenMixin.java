@@ -26,7 +26,7 @@ public class CraftingScreenMixin {
 
             if (mc.player != null) {
                 ci.cancel();
-                mc.tell(() -> mc.setScreen(new GridlessCraftingScreen<>(
+                mc.execute(() -> mc.setScreen(new GridlessCraftingScreen<>(
                         menu,
                         mc.player.getInventory(),
                         Component.translatable("container.crafting"),
