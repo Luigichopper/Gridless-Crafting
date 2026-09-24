@@ -10,3 +10,4 @@ public interface SingleItemRecipeAccessor {
     @Accessor("result")
     ItemStack getResult();
 }
+

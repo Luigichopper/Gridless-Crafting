@@ -21,13 +21,18 @@ public class CountedIngredient {
     }
 
     public boolean test(ItemStack stack) {
-        return ingredient.test(stack);
+        return IngredientBag.isMatch(ingredient, stack);
     }
 
     public ItemStack[] getMatchingStacks() {
-        return ingredient.items()
-                .map(net.minecraft.core.Holder::value)
-                .map(ItemStack::new)
-                .toArray(ItemStack[]::new);
+        try {
+            return ingredient.items()
+                    .map(net.minecraft.core.Holder::value)
+                    .map(ItemStack::new)
+                    .toArray(ItemStack[]::new);
+        } catch (Throwable t) {
+            return new ItemStack[0];
+        }
     }
 }
+

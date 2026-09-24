@@ -14,18 +14,16 @@ public class RecipeIndexer {
     private static final Map<ResourceLocation, GridlessRecipe> INDEXED_RECIPES = new ConcurrentHashMap<>();
     private static final Map<RecipeType<?>, List<GridlessRecipe>> BY_TYPE = new ConcurrentHashMap<>();
 
-    public static void reindex(RecipeAccess recipeAccess, HolderLookup.Provider registries) {
+    public static void reindex(Object recipeAccess, HolderLookup.Provider registries) {
+        Collection<RecipeHolder<?>> holders = getHolders(recipeAccess);
+        if (holders.isEmpty()) {
+            GridlessMod.LOGGER.warn("Attempted recipe reindex with 0 holders from {}, retaining {} existing recipes.", recipeAccess, INDEXED_RECIPES.size());
+            return;
+        }
+
         INDEXED_RECIPES.clear();
         BY_TYPE.clear();
 
-        Collection<RecipeHolder<?>> holders;
-        if (recipeAccess instanceof RecipeMap map) {
-            holders = map.values();
-        } else if (recipeAccess instanceof net.minecraft.world.item.crafting.RecipeManager manager) {
-            holders = ((com.gridless.mixin.RecipeManagerAccessor) manager).getRecipes().values();
-        } else {
-            holders = Collections.emptyList();
-        }
         GridlessMod.LOGGER.info("Indexing {} vanilla recipes for Gridless Crafting...", holders.size());
 
         for (RecipeHolder<?> holder : holders) {
@@ -35,12 +33,59 @@ public class RecipeIndexer {
                     INDEXED_RECIPES.put(indexed.getId(), indexed);
                     BY_TYPE.computeIfAbsent(indexed.getRecipeType(), k -> new ArrayList<>()).add(indexed);
                 }
-            } catch (Exception e) {
-                GridlessMod.LOGGER.debug("Skipping unindexable recipe: {}", holder.id(), e);
+            } catch (Throwable t) {
+                GridlessMod.LOGGER.debug("Skipping unindexable recipe: {}", holder.id(), t);
             }
         }
 
         GridlessMod.LOGGER.info("Indexed {} gridless recipes across {} types.", INDEXED_RECIPES.size(), BY_TYPE.size());
+    }
+
+    private static Collection<RecipeHolder<?>> getHolders(Object recipeAccess) {
+        if (recipeAccess == null) return Collections.emptyList();
+        if (recipeAccess instanceof RecipeMap map) {
+            return map.values();
+        }
+        if (recipeAccess instanceof net.minecraft.world.item.crafting.RecipeManager manager) {
+            try {
+                return ((com.gridless.mixin.RecipeManagerAccessor) manager).getRecipes().values();
+            } catch (Exception ignored) {}
+        }
+        if (recipeAccess instanceof Collection<?> col) {
+            List<RecipeHolder<?>> holders = new ArrayList<>();
+            for (Object obj : col) {
+                if (obj instanceof RecipeHolder<?> holder) {
+                    holders.add(holder);
+                }
+            }
+            return holders;
+        }
+
+        // Reflection fallback for ClientRecipeContainer or custom containers
+        try {
+            for (java.lang.reflect.Method m : recipeAccess.getClass().getMethods()) {
+                if (m.getParameterCount() == 0) {
+                    Class<?> ret = m.getReturnType();
+                    if (RecipeMap.class.isAssignableFrom(ret)) {
+                        RecipeMap map = (RecipeMap) m.invoke(recipeAccess);
+                        if (map != null && !map.values().isEmpty()) return map.values();
+                    } else if (Collection.class.isAssignableFrom(ret)) {
+                        Collection<?> col = (Collection<?>) m.invoke(recipeAccess);
+                        if (col != null && !col.isEmpty()) {
+                            List<RecipeHolder<?>> holders = new ArrayList<>();
+                            for (Object obj : col) {
+                                if (obj instanceof RecipeHolder<?> holder) {
+                                    holders.add(holder);
+                                }
+                            }
+                            if (!holders.isEmpty()) return holders;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        return Collections.emptyList();
     }
 
     public static GridlessRecipe indexSingle(RecipeHolder<?> holder, HolderLookup.Provider registries) {
@@ -68,8 +113,21 @@ public class RecipeIndexer {
     public static List<GridlessRecipe> getForTypes(List<ResourceLocation> allowedTypeIds) {
         List<GridlessRecipe> result = new ArrayList<>();
         for (Map.Entry<RecipeType<?>, List<GridlessRecipe>> entry : BY_TYPE.entrySet()) {
-            ResourceLocation typeId = net.minecraft.core.registries.BuiltInRegistries.RECIPE_TYPE.getKey(entry.getKey());
+            RecipeType<?> type = entry.getKey();
+            ResourceLocation typeId = net.minecraft.core.registries.BuiltInRegistries.RECIPE_TYPE.getKey(type);
+            boolean match = false;
             if (typeId != null && allowedTypeIds.contains(typeId)) {
+                match = true;
+            } else if (type == RecipeType.CRAFTING && allowedTypeIds.contains(ResourceLocation.fromNamespaceAndPath("minecraft", "crafting"))) {
+                match = true;
+            } else if (type == RecipeType.SMELTING && allowedTypeIds.contains(ResourceLocation.fromNamespaceAndPath("minecraft", "smelting"))) {
+                match = true;
+            } else if (type == RecipeType.BLASTING && allowedTypeIds.contains(ResourceLocation.fromNamespaceAndPath("minecraft", "blasting"))) {
+                match = true;
+            } else if (type == RecipeType.SMOKING && allowedTypeIds.contains(ResourceLocation.fromNamespaceAndPath("minecraft", "smoking"))) {
+                match = true;
+            }
+            if (match) {
                 result.addAll(entry.getValue());
             }
         }
@@ -117,7 +175,7 @@ public class RecipeIndexer {
             } else if (recipe instanceof SingleItemRecipe single) {
                 output = ((com.gridless.mixin.SingleItemRecipeAccessor) single).getResult();
             }
-        } catch (Exception e) {
+        } catch (Throwable ignored) {
             return null;
         }
         if (output == null || output.isEmpty()) return null;
@@ -128,7 +186,7 @@ public class RecipeIndexer {
         }
 
         List<CountedIngredient> inputs;
-        List<Ingredient> ingredients = recipe.placementInfo().ingredients();
+        List<Ingredient> ingredients = extractIngredients(recipe);
         inputs = consolidateIngredients(ingredients);
 
         if (recipe instanceof AbstractCookingRecipe cooking) {
@@ -140,11 +198,46 @@ public class RecipeIndexer {
         return new GridlessRecipe(id, output, inputs, type, RecipeCategory.classify(output), 0, 0f, requires3x3);
     }
 
+    private static List<Ingredient> extractIngredients(Recipe<?> recipe) {
+        if (recipe instanceof ShapedRecipe shaped) {
+            List<Ingredient> list = new ArrayList<>();
+            for (Optional<Ingredient> opt : shaped.getIngredients()) {
+                opt.ifPresent(list::add);
+            }
+            if (!list.isEmpty()) {
+                return list;
+            }
+        } else if (recipe instanceof ShapelessRecipe shapeless) {
+            try {
+                List<Ingredient> ings = ((com.gridless.mixin.ShapelessRecipeAccessor) shapeless).getIngredients();
+                if (ings != null && !ings.isEmpty()) {
+                    return ings;
+                }
+            } catch (Throwable ignored) {}
+        } else if (recipe instanceof SingleItemRecipe single) {
+            try {
+                Ingredient ing = single.input();
+                if (ing != null) {
+                    return List.of(ing);
+                }
+            } catch (Throwable ignored) {}
+        }
+
+        try {
+            return recipe.placementInfo().ingredients();
+        } catch (Throwable ignored) {
+            return Collections.emptyList();
+        }
+    }
+
+
+
     private static List<CountedIngredient> consolidateIngredients(List<Ingredient> list) {
         List<CountedIngredient> result = new ArrayList<>();
+        if (list == null) return result;
 
         for (Ingredient ing : list) {
-            if (ing.isEmpty()) continue;
+            if (ing == null) continue;
 
             boolean merged = false;
             for (int i = 0; i < result.size(); i++) {
@@ -164,9 +257,22 @@ public class RecipeIndexer {
         return result;
     }
 
+
     private static boolean areIngredientsEqual(Ingredient a, Ingredient b) {
         if (a == b) return true;
         if (a == null || b == null) return false;
-        return a.equals(b);
+        if (a.equals(b)) return true;
+        Set<net.minecraft.world.item.Item> itemsA = getIngredientItems(a);
+        Set<net.minecraft.world.item.Item> itemsB = getIngredientItems(b);
+        return !itemsA.isEmpty() && itemsA.equals(itemsB);
+    }
+
+    private static Set<net.minecraft.world.item.Item> getIngredientItems(Ingredient ing) {
+        try {
+            return ing.items().map(net.minecraft.core.Holder::value).collect(java.util.stream.Collectors.toSet());
+        } catch (Throwable e) {
+            return Collections.emptySet();
+        }
     }
 }
+

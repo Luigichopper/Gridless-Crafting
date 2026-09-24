@@ -94,12 +94,15 @@ public class CraftingTransactionHandler {
 
         // 3. Validate Inventory & Calculate Actual Craftable Amount
         IngredientBag bag = IngredientBag.fromPlayer(player);
+        recipe.autoSelectBestVariant(bag);
         int maxCraftable = recipe.maxCraftable(bag);
         int actualCraftAmount = Math.min(requestedAmount, maxCraftable);
 
         if (actualCraftAmount <= 0) {
+            GridlessMod.LOGGER.debug("Player {} has 0 craftable amount for recipe {}", player.getName().getString(), recipeId);
             return;
         }
+
 
         // If station is smelting, check fuel and cap craftable amount by fuel
         if (station != null && station.getMode() == StationMode.SMELTING) {
@@ -144,6 +147,11 @@ public class CraftingTransactionHandler {
                     }
                 }
             }
+
+            if (remainingNeeded > 0) {
+                GridlessMod.LOGGER.warn("Deduction incomplete for recipe {}. Missing {} items", recipeId, remainingNeeded);
+                return;
+            }
         }
 
         // 5. Grant Output Items to Player
@@ -176,3 +184,4 @@ public class CraftingTransactionHandler {
         player.containerMenu.broadcastChanges();
     }
 }
+

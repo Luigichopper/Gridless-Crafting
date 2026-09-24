@@ -228,7 +228,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
                 continue;
             }
             // Category check
-            if (currentCategory != RecipeCategory.ALL && recipe.getCategory() != currentCategory) {
+            if (!recipe.matchesCategory(currentCategory)) {
                 continue;
             }
             // Search text check

@@ -2,7 +2,7 @@ package com.gridless.forge;
 
 import com.gridless.GridlessMod;
 import com.gridless.api.station.StationRegistry;
-import com.gridless.client.gui.GridlessConfigScreen;
+import com.gridless.client.screen.GridlessConfigScreen;
 import com.gridless.forge.network.ForgeNetworkHandler;
 import com.gridless.sound.GridlessSounds;
 import net.minecraft.core.registries.Registries;

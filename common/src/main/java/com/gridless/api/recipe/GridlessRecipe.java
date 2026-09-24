@@ -112,6 +112,18 @@ public class GridlessRecipe {
         return category;
     }
 
+    public boolean matchesCategory(RecipeCategory target) {
+        if (target == null || target == RecipeCategory.ALL) return true;
+        if (this.category == target) return true;
+        if (target == RecipeCategory.WEAPONS && (result.getItem() instanceof net.minecraft.world.item.AxeItem || result.getItem() instanceof net.minecraft.world.item.ShieldItem)) {
+            return true;
+        }
+        if (target == RecipeCategory.TOOLS && result.getItem() instanceof net.minecraft.world.item.AxeItem) {
+            return true;
+        }
+        return false;
+    }
+
     public int getCookTime() {
         return getActiveVariant().cookTime;
     }

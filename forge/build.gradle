@@ -17,8 +17,13 @@ configurations {
     common
     shadowCommon
     compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'net.sf.jopt-simple:jopt-simple:5.0.4'
+    }
 }
 
 dependencies {

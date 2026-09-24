@@ -23,7 +23,7 @@ public class RecipeManagerMixin {
 
     @Inject(method = "apply(Lnet/minecraft/world/item/crafting/RecipeMap;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At("TAIL"))
     private void onApply(RecipeMap map, ResourceManager resourceManager, ProfilerFiller profiler, CallbackInfo ci) {
-        RecipeManager self = (RecipeManager) (Object) this;
-        RecipeIndexer.reindex(self, this.registries);
+        RecipeIndexer.reindex(map, this.registries);
     }
 }
+

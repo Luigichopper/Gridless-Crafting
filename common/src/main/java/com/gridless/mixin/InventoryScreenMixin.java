@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -17,7 +18,6 @@ import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
@@ -37,6 +37,10 @@ public class InventoryScreenMixin {
             int x = accessor.getLeftPos();
             int y = accessor.getTopPos();
             graphics.blit(net.minecraft.client.renderer.RenderType::guiTextured, CLEAN_INVENTORY_LOCATION, x, y, 0.0F, 0.0F, 176, 166, 256, 256);
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null) {
+                InventoryScreen.renderEntityInInventoryFollowsMouse(graphics, x + 26, y + 8, x + 75, y + 78, 30, 0.0625F, (float) mouseX, (float) mouseY, mc.player);
+            }
         }
     }
 
@@ -50,7 +54,25 @@ public class InventoryScreenMixin {
         Minecraft mc = Minecraft.getInstance();
 
         if (GridlessConfig.general.remove_crafting_inventory) {
+            try {
+                Class<?> cls = self.getClass();
+                while (cls != null && cls != Object.class) {
+                    for (java.lang.reflect.Field field : cls.getDeclaredFields()) {
+                        if (RecipeBookComponent.class.isAssignableFrom(field.getType())) {
+                            field.setAccessible(true);
+                            RecipeBookComponent rbc = (RecipeBookComponent) field.get(self);
+                            if (rbc != null && rbc.isVisible()) {
+                                rbc.toggleVisibility();
+                            }
+                            break;
+                        }
+                    }
+                    cls = cls.getSuperclass();
+                }
+            } catch (Throwable ignored) {}
             accessor.setLeftPos((self.width - accessor.getImageWidth()) / 2);
+
+
 
             List<? extends GuiEventListener> currentChildren = new ArrayList<>(self.children());
             for (GuiEventListener child : currentChildren) {
@@ -121,3 +143,4 @@ public class InventoryScreenMixin {
         }
     }
 }
+

@@ -2,7 +2,7 @@ package com.gridless.neoforge;
 
 import com.gridless.GridlessMod;
 import com.gridless.api.station.StationRegistry;
-import com.gridless.client.gui.GridlessConfigScreen;
+import com.gridless.client.screen.GridlessConfigScreen;
 import com.gridless.network.C2SCraftGridlessRecipePayload;
 import com.gridless.network.CraftingTransactionHandler;
 import com.gridless.sound.GridlessSounds;
