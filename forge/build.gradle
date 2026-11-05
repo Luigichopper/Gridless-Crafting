@@ -30,6 +30,7 @@ dependencies {
 }
 
 processResources {
+    from project(":common").sourceSets.main.resources
     inputs.property "version", project.version
 
     filesMatching("META-INF/mods.toml") {

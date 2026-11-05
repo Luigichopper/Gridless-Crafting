@@ -47,3 +47,4 @@ public class NeoForgeNetworkHandler {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), payload);
     }
 }
+
