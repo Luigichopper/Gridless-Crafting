@@ -1,13 +1,13 @@
 package com.gridless.neoforge.platform;
 
+import com.gridless.neoforge.network.NeoForgeNetworkHandler;
+import com.gridless.network.C2SCraftGridlessRecipePayload;
 import com.gridless.platform.services.IPlatformHelper;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.nio.file.Path;
 
@@ -33,13 +33,13 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public void sendToServer(CustomPacketPayload payload) {
-        PacketDistributor.sendToServer(payload);
+    public void sendToServer(C2SCraftGridlessRecipePayload payload) {
+        NeoForgeNetworkHandler.sendToServer(payload);
     }
 
     @Override
-    public void sendToPlayer(ServerPlayer player, CustomPacketPayload payload) {
-        PacketDistributor.sendToPlayer(player, payload);
+    public void sendToPlayer(ServerPlayer player, C2SCraftGridlessRecipePayload payload) {
+        NeoForgeNetworkHandler.sendToPlayer(player, payload);
     }
 
     @Override

@@ -200,12 +200,12 @@ public class RecipeRibbonWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (this.isHovered) {
-            this.scrollOffset = Mth.clamp(this.scrollOffset - scrollY * ITEM_SIZE, 0, getMaxScroll());
+            this.scrollOffset = Mth.clamp(this.scrollOffset - delta * ITEM_SIZE, 0, getMaxScroll());
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
     @Override

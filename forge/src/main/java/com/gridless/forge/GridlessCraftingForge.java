@@ -18,11 +18,11 @@ import net.minecraftforge.registries.RegisterEvent;
 
 @Mod(GridlessMod.MOD_ID)
 public class GridlessCraftingForge {
-    public GridlessCraftingForge(FMLJavaModLoadingContext context) {
+    public GridlessCraftingForge() {
         GridlessMod.init();
         ForgeNetworkHandler.init();
 
-        IEventBus modEventBus = context.getModEventBus();
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         modEventBus.addListener(this::registerSounds);
 
         MinecraftForge.EVENT_BUS.addListener(this::addReloadListeners);

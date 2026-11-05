@@ -6,7 +6,6 @@ import com.gridless.network.C2SCraftGridlessRecipePayload;
 import com.gridless.network.CraftingTransactionHandler;
 import com.gridless.sound.GridlessSounds;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -24,18 +23,16 @@ public class GridlessCraftingFabric implements ModInitializer {
         GridlessMod.init();
         GridlessSounds.init();
 
-        // Register custom networking payloads (1.21.1)
-        PayloadTypeRegistry.playC2S().register(C2SCraftGridlessRecipePayload.TYPE, C2SCraftGridlessRecipePayload.STREAM_CODEC);
-
-        ServerPlayNetworking.registerGlobalReceiver(C2SCraftGridlessRecipePayload.TYPE, (payload, context) -> {
-            context.server().execute(() -> CraftingTransactionHandler.handleCraft(context.player(), payload));
+        ServerPlayNetworking.registerGlobalReceiver(C2SCraftGridlessRecipePayload.ID, (server, player, handler, buf, responseSender) -> {
+            C2SCraftGridlessRecipePayload payload = new C2SCraftGridlessRecipePayload(buf);
+            server.execute(() -> CraftingTransactionHandler.handleCraft(player, payload));
         });
 
         // Register Data Pack Reload Listener for Gridless Stations
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
             @Override
             public ResourceLocation getFabricId() {
-                return ResourceLocation.fromNamespaceAndPath(GridlessMod.MOD_ID, "gridless_stations");
+                return new ResourceLocation(GridlessMod.MOD_ID, "gridless_stations");
             }
 
             @Override

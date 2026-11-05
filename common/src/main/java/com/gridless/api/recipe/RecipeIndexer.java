@@ -1,8 +1,8 @@
 package com.gridless.api.recipe;
 
 import com.gridless.GridlessMod;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
@@ -14,38 +14,38 @@ public class RecipeIndexer {
     private static final Map<ResourceLocation, GridlessRecipe> INDEXED_RECIPES = new ConcurrentHashMap<>();
     private static final Map<RecipeType<?>, List<GridlessRecipe>> BY_TYPE = new ConcurrentHashMap<>();
 
-    public static void reindex(RecipeManager recipeManager, HolderLookup.Provider registries) {
+    public static void reindex(RecipeManager recipeManager, RegistryAccess registries) {
         INDEXED_RECIPES.clear();
         BY_TYPE.clear();
 
-        Collection<RecipeHolder<?>> holders = recipeManager.getRecipes();
-        GridlessMod.LOGGER.info("Indexing {} vanilla recipes for Gridless Crafting...", holders.size());
+        Collection<Recipe<?>> recipes = recipeManager.getRecipes();
+        GridlessMod.LOGGER.info("Indexing {} vanilla recipes for Gridless Crafting...", recipes.size());
 
-        for (RecipeHolder<?> holder : holders) {
+        for (Recipe<?> recipe : recipes) {
             try {
-                GridlessRecipe indexed = indexRecipe(holder, registries);
+                GridlessRecipe indexed = indexRecipe(recipe, registries);
                 if (indexed != null && !indexed.getResult().isEmpty()) {
                     INDEXED_RECIPES.put(indexed.getId(), indexed);
                     BY_TYPE.computeIfAbsent(indexed.getRecipeType(), k -> new ArrayList<>()).add(indexed);
                 }
             } catch (Exception e) {
-                GridlessMod.LOGGER.debug("Skipping unindexable recipe: {}", holder.id(), e);
+                GridlessMod.LOGGER.debug("Skipping unindexable recipe: {}", recipe.getId(), e);
             }
         }
 
         GridlessMod.LOGGER.info("Indexed {} gridless recipes across {} types.", INDEXED_RECIPES.size(), BY_TYPE.size());
     }
 
-    public static GridlessRecipe indexSingle(RecipeHolder<?> holder, HolderLookup.Provider registries) {
+    public static GridlessRecipe indexSingle(Recipe<?> recipe, RegistryAccess registries) {
         try {
-            GridlessRecipe indexed = indexRecipe(holder, registries);
+            GridlessRecipe indexed = indexRecipe(recipe, registries);
             if (indexed != null && !indexed.getResult().isEmpty()) {
                 INDEXED_RECIPES.put(indexed.getId(), indexed);
                 BY_TYPE.computeIfAbsent(indexed.getRecipeType(), k -> new ArrayList<>()).add(indexed);
                 return indexed;
             }
         } catch (Exception e) {
-            GridlessMod.LOGGER.debug("Failed to index single recipe: {}", holder.id(), e);
+            GridlessMod.LOGGER.debug("Failed to index single recipe: {}", recipe.getId(), e);
         }
         return null;
     }
@@ -96,14 +96,13 @@ public class RecipeIndexer {
         return grouped;
     }
 
-    public static GridlessRecipe indexRecipe(RecipeHolder<?> holder, HolderLookup.Provider registries) {
-        Recipe<?> recipe = holder.value();
-        ResourceLocation id = holder.id();
+    public static GridlessRecipe indexRecipe(Recipe<?> recipe, RegistryAccess registries) {
+        ResourceLocation id = recipe.getId();
         RecipeType<?> type = recipe.getType();
 
         ItemStack output;
         try {
-            output = recipe.getResultItem(registries != null ? registries : HolderLookup.Provider.create(java.util.stream.Stream.empty()));
+            output = recipe.getResultItem(registries != null ? registries : RegistryAccess.EMPTY);
         } catch (Exception e) {
             return null;
         }

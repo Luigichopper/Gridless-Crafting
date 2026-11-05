@@ -342,13 +342,13 @@ public class IngredientCardWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (!this.isHovered || recipe == null) return false;
 
         int headerY = this.getY() + 4;
         // If scrolling over header banner with multiple variants, cycle variants!
         if (mouseY >= headerY && mouseY < headerY + 22 && recipe.getVariantCount() > 1) {
-            recipe.cycleVariant(scrollY > 0 ? -1 : 1);
+            recipe.cycleVariant(delta > 0 ? -1 : 1);
             variantCycleTicks = 0;
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(GridlessSounds.RECIPE_SELECT, 1.0f));
             return true;
@@ -357,11 +357,11 @@ public class IngredientCardWidget extends AbstractWidget {
         // Scroll ingredients viewport
         int maxScroll = getMaxScroll();
         if (maxScroll > 0) {
-            this.scrollOffset = Mth.clamp(this.scrollOffset - scrollY * 15, 0, maxScroll);
+            this.scrollOffset = Mth.clamp(this.scrollOffset - delta * 15, 0, maxScroll);
             return true;
         }
 
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
     @Override

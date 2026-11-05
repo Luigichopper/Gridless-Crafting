@@ -202,7 +202,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
         }
 
         if (this.isInventoryCrafting || (this.station != null && this.station.getId().equals(StationRegistry.INVENTORY))) {
-            allStationRecipes = new ArrayList<>(RecipeIndexer.getForTypes(List.of(ResourceLocation.fromNamespaceAndPath("minecraft", "crafting"))));
+            allStationRecipes = new ArrayList<>(RecipeIndexer.getForTypes(List.of(new ResourceLocation("minecraft", "crafting"))));
             allStationRecipes.removeIf(GridlessRecipe::requires3x3);
             for (GridlessRecipe r : allStationRecipes) {
                 r.remove3x3Variants();
@@ -397,7 +397,7 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics, mouseX, mouseY, partialTick);
+        this.renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTick);
         this.renderTooltip(graphics, mouseX, mouseY);
 
@@ -524,18 +524,18 @@ public class GridlessCraftingScreen<T extends AbstractContainerMenu> extends Abs
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (this.ingredientCard != null && this.ingredientCard.isMouseOver(mouseX, mouseY)) {
-            if (this.ingredientCard.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            if (this.ingredientCard.mouseScrolled(mouseX, mouseY, delta)) {
                 return true;
             }
         }
         if (this.recipeRibbon != null && this.recipeRibbon.isMouseOver(mouseX, mouseY)) {
-            if (this.recipeRibbon.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            if (this.recipeRibbon.mouseScrolled(mouseX, mouseY, delta)) {
                 return true;
             }
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
     @Override

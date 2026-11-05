@@ -27,7 +27,7 @@ import java.util.Optional;
 @Mixin(InventoryScreen.class)
 public class InventoryScreenMixin {
 
-    private static final ResourceLocation CLEAN_INVENTORY_LOCATION = ResourceLocation.fromNamespaceAndPath("gridless", "textures/gui/container/inventory.png");
+    private static final ResourceLocation CLEAN_INVENTORY_LOCATION = new ResourceLocation("gridless", "textures/gui/container/inventory.png");
 
     @ModifyArg(
             method = "renderBg",

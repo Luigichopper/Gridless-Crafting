@@ -1,10 +1,12 @@
 package com.gridless.fabric.platform;
 
+import com.gridless.network.C2SCraftGridlessRecipePayload;
 import com.gridless.platform.services.IPlatformHelper;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 
@@ -32,13 +34,17 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public void sendToServer(CustomPacketPayload payload) {
-        ClientPlayNetworking.send(payload);
+    public void sendToServer(C2SCraftGridlessRecipePayload payload) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        payload.write(buf);
+        ClientPlayNetworking.send(C2SCraftGridlessRecipePayload.ID, buf);
     }
 
     @Override
-    public void sendToPlayer(ServerPlayer player, CustomPacketPayload payload) {
-        ServerPlayNetworking.send(player, payload);
+    public void sendToPlayer(ServerPlayer player, C2SCraftGridlessRecipePayload payload) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        payload.write(buf);
+        ServerPlayNetworking.send(player, C2SCraftGridlessRecipePayload.ID, buf);
     }
 
     @Override

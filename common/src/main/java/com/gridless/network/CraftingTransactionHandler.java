@@ -20,7 +20,7 @@ import net.minecraft.world.inventory.BlastFurnaceMenu;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.SmokerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -69,9 +69,9 @@ public class CraftingTransactionHandler {
         // 2. Resolve Recipe
         GridlessRecipe recipe = RecipeIndexer.get(recipeId);
         if (recipe == null && player.server != null) {
-            Optional<RecipeHolder<?>> holderOpt = player.server.getRecipeManager().byKey(recipeId);
-            if (holderOpt.isPresent()) {
-                recipe = RecipeIndexer.indexSingle(holderOpt.get(), player.server.registryAccess());
+            Optional<? extends Recipe<?>> recipeOpt = player.server.getRecipeManager().byKey(recipeId);
+            if (recipeOpt.isPresent()) {
+                recipe = RecipeIndexer.indexSingle(recipeOpt.get(), player.server.registryAccess());
             }
         }
         if (recipe == null) {
@@ -152,7 +152,8 @@ public class CraftingTransactionHandler {
 
         while (totalOutputCount > 0) {
             int stackCount = Math.min(totalOutputCount, maxStackSize);
-            ItemStack resultStack = resultTemplate.copyWithCount(stackCount);
+            ItemStack resultStack = resultTemplate.copy();
+            resultStack.setCount(stackCount);
             totalOutputCount -= stackCount;
 
             if (!inv.add(resultStack)) {

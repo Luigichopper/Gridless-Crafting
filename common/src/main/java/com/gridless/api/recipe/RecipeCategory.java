@@ -27,7 +27,7 @@ public enum RecipeCategory {
         if (stack.isEmpty()) return MISC;
         Item item = stack.getItem();
 
-        if (item instanceof SwordItem || item instanceof ProjectileWeaponItem || item instanceof TridentItem || item instanceof MaceItem) {
+        if (item instanceof SwordItem || item instanceof ProjectileWeaponItem || item instanceof TridentItem) {
             return WEAPONS;
         }
         if (item instanceof DiggerItem || item instanceof FishingRodItem || item instanceof ShearsItem || item instanceof FlintAndSteelItem) {
@@ -36,7 +36,7 @@ public enum RecipeCategory {
         if (item instanceof ArmorItem || item instanceof ShieldItem) {
             return ARMOR;
         }
-        if (stack.has(net.minecraft.core.component.DataComponents.FOOD) || item instanceof PotionItem) {
+        if (item.isEdible() || item instanceof PotionItem) {
             return CONSUMABLES;
         }
         if (item instanceof BlockItem blockItem) {

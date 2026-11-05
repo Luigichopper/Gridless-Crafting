@@ -14,7 +14,7 @@ public class GridlessSounds {
     public static final SoundEvent CRAFT_FAIL = create("craft_fail");
 
     private static SoundEvent create(String name) {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(GridlessMod.MOD_ID, name);
+        ResourceLocation id = new ResourceLocation(GridlessMod.MOD_ID, name);
         return SoundEvent.createVariableRangeEvent(id);
     }
 

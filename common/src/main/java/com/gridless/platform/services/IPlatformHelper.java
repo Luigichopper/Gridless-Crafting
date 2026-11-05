@@ -1,11 +1,10 @@
 package com.gridless.platform.services;
 
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.gridless.network.C2SCraftGridlessRecipePayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 
 import java.nio.file.Path;
-import java.util.function.Consumer;
 
 public interface IPlatformHelper {
     /**
@@ -31,12 +30,12 @@ public interface IPlatformHelper {
     /**
      * Sends a custom packet payload to the server.
      */
-    void sendToServer(CustomPacketPayload payload);
+    void sendToServer(C2SCraftGridlessRecipePayload payload);
 
     /**
      * Sends a custom packet payload to a specific player on the server.
      */
-    void sendToPlayer(ServerPlayer player, CustomPacketPayload payload);
+    void sendToPlayer(ServerPlayer player, C2SCraftGridlessRecipePayload payload);
 
     /**
      * Opens a menu on the server side with optional extra packet data.

@@ -23,11 +23,11 @@ public class StationRegistry extends SimpleJsonResourceReloadListener {
     private static final Map<ResourceLocation, GridlessStation> STATIONS = new ConcurrentHashMap<>();
 
     // Built-in default station IDs
-    public static final ResourceLocation WORKBENCH = ResourceLocation.fromNamespaceAndPath("minecraft", "crafting_table");
-    public static final ResourceLocation INVENTORY = ResourceLocation.fromNamespaceAndPath("gridless", "inventory");
-    public static final ResourceLocation FURNACE = ResourceLocation.fromNamespaceAndPath("minecraft", "furnace");
-    public static final ResourceLocation BLAST_FURNACE = ResourceLocation.fromNamespaceAndPath("minecraft", "blast_furnace");
-    public static final ResourceLocation SMOKER = ResourceLocation.fromNamespaceAndPath("minecraft", "smoker");
+    public static final ResourceLocation WORKBENCH = new ResourceLocation("minecraft", "crafting_table");
+    public static final ResourceLocation INVENTORY = new ResourceLocation("gridless", "inventory");
+    public static final ResourceLocation FURNACE = new ResourceLocation("minecraft", "furnace");
+    public static final ResourceLocation BLAST_FURNACE = new ResourceLocation("minecraft", "blast_furnace");
+    public static final ResourceLocation SMOKER = new ResourceLocation("minecraft", "smoker");
 
     static {
         registerDefaults();
@@ -41,8 +41,8 @@ public class StationRegistry extends SimpleJsonResourceReloadListener {
         // Workbench
         register(new GridlessStation(
                 WORKBENCH,
-                ResourceLocation.fromNamespaceAndPath("c", "workbench"),
-                List.of(ResourceLocation.fromNamespaceAndPath("minecraft", "crafting")),
+                new ResourceLocation("c", "workbench"),
+                List.of(new ResourceLocation("minecraft", "crafting")),
                 true,
                 true,
                 StationMode.NORMAL
@@ -52,7 +52,7 @@ public class StationRegistry extends SimpleJsonResourceReloadListener {
         register(new GridlessStation(
                 INVENTORY,
                 null,
-                List.of(ResourceLocation.fromNamespaceAndPath("minecraft", "crafting")),
+                List.of(new ResourceLocation("minecraft", "crafting")),
                 true,
                 false,
                 StationMode.NORMAL
@@ -61,8 +61,8 @@ public class StationRegistry extends SimpleJsonResourceReloadListener {
         // Furnace
         register(new GridlessStation(
                 FURNACE,
-                ResourceLocation.fromNamespaceAndPath("c", "furnace"),
-                List.of(ResourceLocation.fromNamespaceAndPath("minecraft", "smelting")),
+                new ResourceLocation("c", "furnace"),
+                List.of(new ResourceLocation("minecraft", "smelting")),
                 true,
                 true,
                 StationMode.SMELTING
@@ -71,8 +71,8 @@ public class StationRegistry extends SimpleJsonResourceReloadListener {
         // Blast Furnace
         register(new GridlessStation(
                 BLAST_FURNACE,
-                ResourceLocation.fromNamespaceAndPath("c", "blast_furnace"),
-                List.of(ResourceLocation.fromNamespaceAndPath("minecraft", "blasting")),
+                new ResourceLocation("c", "blast_furnace"),
+                List.of(new ResourceLocation("minecraft", "blasting")),
                 true,
                 true,
                 StationMode.SMELTING
@@ -81,8 +81,8 @@ public class StationRegistry extends SimpleJsonResourceReloadListener {
         // Smoker
         register(new GridlessStation(
                 SMOKER,
-                ResourceLocation.fromNamespaceAndPath("c", "smoker"),
-                List.of(ResourceLocation.fromNamespaceAndPath("minecraft", "smoking")),
+                new ResourceLocation("c", "smoker"),
+                List.of(new ResourceLocation("minecraft", "smoking")),
                 true,
                 true,
                 StationMode.SMELTING
@@ -119,14 +119,14 @@ public class StationRegistry extends SimpleJsonResourceReloadListener {
             ResourceLocation fileId = entry.getKey();
             try {
                 JsonObject json = entry.getValue().getAsJsonObject();
-                ResourceLocation id = json.has("id") ? ResourceLocation.parse(json.get("id").getAsString()) : fileId;
-                ResourceLocation blockTag = json.has("block_tag") ? ResourceLocation.parse(json.get("block_tag").getAsString()) : null;
+                ResourceLocation id = json.has("id") ? new ResourceLocation(json.get("id").getAsString()) : fileId;
+                ResourceLocation blockTag = json.has("block_tag") ? new ResourceLocation(json.get("block_tag").getAsString()) : null;
 
                 List<ResourceLocation> allowedRecipeTypes = new ArrayList<>();
                 if (json.has("allowed_recipe_types")) {
                     JsonArray typesArray = json.getAsJsonArray("allowed_recipe_types");
                     for (JsonElement typeElement : typesArray) {
-                        allowedRecipeTypes.add(ResourceLocation.parse(typeElement.getAsString()));
+                        allowedRecipeTypes.add(new ResourceLocation(typeElement.getAsString()));
                     }
                 }
 
